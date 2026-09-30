@@ -1,2 +1,1 @@
-# sinif-bildirisi
-sınıftaki olayları buraya kaydetiyorum.
+For Sutdy
