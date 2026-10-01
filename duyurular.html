@@ -596,68 +596,27 @@ const supabaseClient =
    ELEMENTLER
 ========================================================= */
 
-const topLoginLink =
-    document.getElementById("topLoginLink");
-
-const topUser =
-    document.getElementById("topUser");
-
-const topUserEmail =
-    document.getElementById("topUserEmail");
-
-const logoutButton =
-    document.getElementById("logoutButton");
-
-const duyuruListesi =
-    document.getElementById("duyuruListesi");
-
-const adminPanel =
-    document.getElementById("adminPanel");
-
-const adminLoginBox =
-    document.getElementById("adminLoginBox");
-
-const adminControls =
-    document.getElementById("adminControls");
-
-const adminEmail =
-    document.getElementById("adminEmail");
-
-const adminPassword =
-    document.getElementById("adminPassword");
-
-const adminLoginButton =
-    document.getElementById("adminLoginButton");
-
-const adminMessage =
-    document.getElementById("adminMessage");
-
-const adminDuyuruList =
-    document.getElementById("adminDuyuruList");
-
-const duyuruBaslikInput =
-    document.getElementById("duyuruBaslikInput");
-
-const duyuruAciklamaInput =
-    document.getElementById("duyuruAciklamaInput");
-
-const duyuruTarihInput =
-    document.getElementById("duyuruTarihInput");
-
-const duyuruFormTitle =
-    document.getElementById("duyuruFormTitle");
-
-const saveDuyuruButton =
-    document.getElementById("saveDuyuruButton");
-
-const cancelDuyuruButton =
-    document.getElementById("cancelDuyuruButton");
-
-const duyuruMessage =
-    document.getElementById("duyuruMessage");
-
-const adminLogoutButton =
-    document.getElementById("adminLogoutButton");
+const topLoginLink = document.getElementById("topLoginLink");
+const topUser = document.getElementById("topUser");
+const topUserEmail = document.getElementById("topUserEmail");
+const logoutButton = document.getElementById("logoutButton");
+const duyuruListesi = document.getElementById("duyuruListesi");
+const adminPanel = document.getElementById("adminPanel");
+const adminLoginBox = document.getElementById("adminLoginBox");
+const adminControls = document.getElementById("adminControls");
+const adminEmail = document.getElementById("adminEmail");
+const adminPassword = document.getElementById("adminPassword");
+const adminLoginButton = document.getElementById("adminLoginButton");
+const adminMessage = document.getElementById("adminMessage");
+const adminDuyuruList = document.getElementById("adminDuyuruList");
+const duyuruBaslikInput = document.getElementById("duyuruBaslikInput");
+const duyuruAciklamaInput = document.getElementById("duyuruAciklamaInput");
+const duyuruTarihInput = document.getElementById("duyuruTarihInput");
+const duyuruFormTitle = document.getElementById("duyuruFormTitle");
+const saveDuyuruButton = document.getElementById("saveDuyuruButton");
+const cancelDuyuruButton = document.getElementById("cancelDuyuruButton");
+const duyuruMessage = document.getElementById("duyuruMessage");
+const adminLogoutButton = document.getElementById("adminLogoutButton");
 
 
 /* =========================================================
@@ -665,6 +624,9 @@ const adminLogoutButton =
 ========================================================= */
 
 let duzenlenenDuyuruId = null;
+let mevcutSession = null;
+let mevcutKullanici = null;
+let mevcutKullaniciAdminMi = false;
 
 
 /* =========================================================
@@ -672,6 +634,9 @@ let duzenlenenDuyuruId = null;
 ========================================================= */
 
 function ustCubuguGuncelle(session) {
+
+    mevcutSession = session;
+    mevcutKullanici = session?.user || null;
 
     if (session && session.user) {
 
@@ -689,24 +654,37 @@ function ustCubuguGuncelle(session) {
 }
 
 
-logoutButton.addEventListener(
-    "click",
-    async function () {
+logoutButton.addEventListener("click", async function () {
 
-        const { error } =
-            await supabaseClient.auth.signOut();
+    const { error } =
+        await supabaseClient.auth.signOut();
 
-        if (error) {
-            console.error("Çıkış yapılamadı:", error);
-        }
-
+    if (error) {
+        console.error("Çıkış yapılamadı:", error);
+        return;
     }
-);
+
+    mevcutSession = null;
+    mevcutKullanici = null;
+    mevcutKullaniciAdminMi = false;
+
+    await duyurulariGetir();
+});
 
 
 supabaseClient.auth.onAuthStateChange(
-    function (event, session) {
+    async function (event, session) {
+
         ustCubuguGuncelle(session);
+
+        if (session && session.user) {
+            mevcutKullanici = session.user;
+        } else {
+            mevcutKullanici = null;
+            mevcutKullaniciAdminMi = false;
+        }
+
+        await duyurulariGetir();
     }
 );
 
@@ -735,12 +713,32 @@ function tarihiFormatla(tarih) {
     }
 
     return (
-        parcalar[2] +
-        "." +
-        parcalar[1] +
-        "." +
+        parcalar[2] + "." +
+        parcalar[1] + "." +
         parcalar[0]
     );
+}
+
+
+function yorumTarihiFormatla(tarih) {
+
+    if (!tarih) {
+        return "";
+    }
+
+    const tarihObjesi = new Date(tarih);
+
+    if (Number.isNaN(tarihObjesi.getTime())) {
+        return "";
+    }
+
+    return tarihObjesi.toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 }
 
 
@@ -759,7 +757,6 @@ async function duyurulariGetir() {
     } = await supabaseClient
         .rpc("duyurulari_getir");
 
-
     if (error) {
 
         console.error(
@@ -773,7 +770,6 @@ async function duyurulariGetir() {
         return [];
     }
 
-
     if (!data || data.length === 0) {
 
         duyuruListesi.textContent =
@@ -782,54 +778,269 @@ async function duyurulariGetir() {
         return [];
     }
 
-
     duyuruListesi.innerHTML = "";
 
+    if (mevcutKullanici) {
+        mevcutKullaniciAdminMi = await adminMi();
+    } else {
+        mevcutKullaniciAdminMi = false;
+    }
 
-    data.forEach(function (duyuru) {
+    for (const duyuru of data) {
 
-        const kutu =
-            document.createElement("div");
-
+        const kutu = document.createElement("div");
         kutu.className = "duyuru";
 
+        const baslik = document.createElement("h2");
+        baslik.textContent = duyuru.baslik;
 
-        const baslik =
-            document.createElement("h2");
-
-        baslik.textContent =
-            duyuru.baslik;
-
-
-        const tarih =
-            document.createElement("div");
-
+        const tarih = document.createElement("div");
         tarih.className = "duyuru-tarih";
-
         tarih.textContent =
-            "Tarih: " +
-            tarihiFormatla(duyuru.tarih);
+            "Tarih: " + tarihiFormatla(duyuru.tarih);
 
-
-        const aciklama =
-            document.createElement("p");
-
+        const aciklama = document.createElement("p");
         aciklama.className = "duyuru-aciklama";
-
-        aciklama.textContent =
-            duyuru.aciklama;
-
+        aciklama.textContent = duyuru.aciklama;
 
         kutu.appendChild(baslik);
         kutu.appendChild(tarih);
         kutu.appendChild(aciklama);
 
+        const yorumAlani =
+            await yorumAlaniOlustur(duyuru.id);
+
+        kutu.appendChild(yorumAlani);
         duyuruListesi.appendChild(kutu);
-
-    });
-
+    }
 
     return data;
+}
+
+
+/* =========================================================
+   YORUM ALANI
+========================================================= */
+
+async function yorumAlaniOlustur(duyuruId) {
+
+    const alan = document.createElement("div");
+    alan.className = "yorum-alani";
+
+    const baslik = document.createElement("h3");
+    baslik.textContent = "Yorumlar";
+    alan.appendChild(baslik);
+
+    const yorumListesi = document.createElement("div");
+    yorumListesi.className = "yorum-listesi";
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .rpc("duyuru_yorumlarini_getir", {
+            p_duyuru_id: duyuruId
+        });
+
+    if (error) {
+
+        console.error(
+            "Yorumlar alınamadı:",
+            error
+        );
+
+        yorumListesi.textContent =
+            "Yorumlar yüklenemedi.";
+
+    } else if (!data || data.length === 0) {
+
+        yorumListesi.textContent =
+            "Henüz yorum yok.";
+
+    } else {
+
+        data.forEach(function (yorum) {
+            yorumListesi.appendChild(
+                yorumKutusuOlustur(yorum)
+            );
+        });
+    }
+
+    alan.appendChild(yorumListesi);
+
+
+    /* =====================================================
+       YORUM YAZMA
+    ===================================================== */
+
+    const yorumForm = document.createElement("div");
+    yorumForm.className = "yorum-form";
+
+    if (!mevcutKullanici) {
+
+        const girisMesaji = document.createElement("p");
+        girisMesaji.textContent =
+            "Yorum yazmak için giriş yapmalısın.";
+
+        yorumForm.appendChild(girisMesaji);
+
+    } else {
+
+        const textarea = document.createElement("textarea");
+        textarea.className = "input";
+        textarea.maxLength = 500;
+        textarea.placeholder = "Yorumunu yaz...";
+
+        const bilgi = document.createElement("div");
+        bilgi.className = "small-note";
+        bilgi.textContent = "En fazla 500 karakter.";
+
+        const yorumButton = document.createElement("button");
+        yorumButton.className = "secondary-button";
+        yorumButton.textContent = "Yorum Yap";
+
+        const mesaj = document.createElement("div");
+        mesaj.className = "form-message";
+
+        yorumButton.addEventListener("click", async function () {
+
+            const yorum = textarea.value.trim();
+
+            if (!yorum) {
+                mesaj.textContent = "Yorum boş olamaz.";
+                return;
+            }
+
+            if (yorum.length > 500) {
+                mesaj.textContent =
+                    "Yorum en fazla 500 karakter olabilir.";
+                return;
+            }
+
+            yorumButton.disabled = true;
+            mesaj.textContent = "Yorum gönderiliyor...";
+
+            const { error } =
+                await supabaseClient
+                    .rpc("duyuru_yorum_ekle", {
+                        p_duyuru_id: duyuruId,
+                        p_yorum: yorum
+                    });
+
+            if (error) {
+
+                console.error(
+                    "Yorum gönderilemedi:",
+                    error
+                );
+
+                mesaj.textContent =
+                    "Yorum gönderilemedi: " +
+                    error.message;
+
+                yorumButton.disabled = false;
+                return;
+            }
+
+            await duyurulariGetir();
+        });
+
+        yorumForm.appendChild(textarea);
+        yorumForm.appendChild(bilgi);
+        yorumForm.appendChild(yorumButton);
+        yorumForm.appendChild(mesaj);
+    }
+
+    alan.appendChild(yorumForm);
+
+    return alan;
+}
+
+
+/* =========================================================
+   YORUM KUTUSU
+========================================================= */
+
+function yorumKutusuOlustur(yorum) {
+
+    const kutu = document.createElement("div");
+    kutu.className = "yorum";
+
+    const ustSatir = document.createElement("div");
+
+    const isim = document.createElement("strong");
+    isim.textContent = yorum.ad || "Kullanıcı";
+
+    const tarih = document.createElement("span");
+    tarih.textContent =
+        " • " + yorumTarihiFormatla(yorum.created_at);
+
+    ustSatir.appendChild(isim);
+    ustSatir.appendChild(tarih);
+
+    const metin = document.createElement("p");
+    metin.textContent = yorum.yorum;
+
+    kutu.appendChild(ustSatir);
+    kutu.appendChild(metin);
+
+    const kendiYorumu =
+        mevcutKullanici &&
+        yorum.user_id === mevcutKullanici.id;
+
+    if (kendiYorumu || mevcutKullaniciAdminMi) {
+
+        const silButton = document.createElement("button");
+        silButton.className = "secondary-button";
+        silButton.textContent = "Yorumu Sil";
+
+        silButton.addEventListener("click", async function () {
+            await yorumSil(yorum.id);
+        });
+
+        kutu.appendChild(silButton);
+    }
+
+    return kutu;
+}
+
+
+/* =========================================================
+   YORUM SİL
+========================================================= */
+
+async function yorumSil(yorumId) {
+
+    const onay = confirm(
+        "Bu yorum silinsin mi?"
+    );
+
+    if (!onay) {
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .rpc("duyuru_yorum_sil", {
+                p_id: yorumId
+            });
+
+    if (error) {
+
+        console.error(
+            "Yorum silinemedi:",
+            error
+        );
+
+        alert(
+            "Yorum silinemedi: " +
+            error.message
+        );
+
+        return;
+    }
+
+    await duyurulariGetir();
 }
 
 
@@ -845,7 +1056,6 @@ async function adminMi() {
     } = await supabaseClient
         .rpc("is_admin");
 
-
     if (error) {
 
         console.error(
@@ -855,7 +1065,6 @@ async function adminMi() {
 
         return false;
     }
-
 
     return data === true;
 }
@@ -878,7 +1087,6 @@ function adminPaneliniKontrolEt() {
         adminPanel.style.display = "none";
         adminControls.style.display = "none";
         adminLoginBox.style.display = "block";
-
     }
 }
 
@@ -889,55 +1097,37 @@ function adminPaneliniKontrolEt() {
 
 async function adminGiris() {
 
-    const email =
-        adminEmail.value.trim();
-
-    const password =
-        adminPassword.value;
-
+    const email = adminEmail.value.trim();
+    const password = adminPassword.value;
 
     adminMessage.textContent = "";
 
-
     if (!email || !password) {
-
-        adminMessage.textContent =
-            "E-posta ve şifre gir.";
-
+        adminMessage.textContent = "E-posta ve şifre gir.";
         return;
     }
 
-
-    adminMessage.textContent =
-        "Giriş yapılıyor...";
-
+    adminMessage.textContent = "Giriş yapılıyor...";
     adminLoginButton.disabled = true;
 
-
-    const {
-        error
-    } = await supabaseClient
-        .auth
-        .signInWithPassword({
-            email: email,
-            password: password
-        });
-
+    const { error } =
+        await supabaseClient
+            .auth
+            .signInWithPassword({
+                email: email,
+                password: password
+            });
 
     if (error) {
 
         adminMessage.textContent =
-            "Giriş başarısız: " +
-            error.message;
+            "Giriş başarısız: " + error.message;
 
         adminLoginButton.disabled = false;
         return;
     }
 
-
-    const yetkili =
-        await adminMi();
-
+    const yetkili = await adminMi();
 
     if (!yetkili) {
 
@@ -950,14 +1140,15 @@ async function adminGiris() {
         return;
     }
 
+    mevcutKullaniciAdminMi = true;
 
     adminLoginBox.style.display = "none";
     adminControls.style.display = "block";
     adminMessage.textContent = "";
     adminLoginButton.disabled = false;
 
-
     await adminDuyurulariGetir();
+    await duyurulariGetir();
 }
 
 
@@ -970,13 +1161,11 @@ async function adminDuyurulariGetir() {
     adminDuyuruList.textContent =
         "Duyurular yükleniyor...";
 
-
     const {
         data,
         error
     } = await supabaseClient
         .rpc("duyurulari_getir");
-
 
     if (error) {
 
@@ -987,7 +1176,6 @@ async function adminDuyurulariGetir() {
         return;
     }
 
-
     if (!data || data.length === 0) {
 
         adminDuyuruList.textContent =
@@ -996,78 +1184,40 @@ async function adminDuyurulariGetir() {
         return;
     }
 
-
     adminDuyuruList.innerHTML = "";
-
 
     data.forEach(function (duyuru) {
 
-        const kutu =
-            document.createElement("div");
-
+        const kutu = document.createElement("div");
         kutu.className = "admin-duyuru";
 
+        const baslik = document.createElement("strong");
+        baslik.textContent = duyuru.baslik;
 
-        const baslik =
-            document.createElement("strong");
-
-        baslik.textContent =
-            duyuru.baslik;
-
-
-        const tarih =
-            document.createElement("div");
-
+        const tarih = document.createElement("div");
         tarih.className = "duyuru-tarih";
-
         tarih.textContent =
-            "Tarih: " +
-            tarihiFormatla(duyuru.tarih);
+            "Tarih: " + tarihiFormatla(duyuru.tarih);
 
+        const aciklama = document.createElement("div");
+        aciklama.className = "admin-duyuru-aciklama";
+        aciklama.textContent = duyuru.aciklama;
 
-        const aciklama =
-            document.createElement("div");
+        const duzenleButton = document.createElement("button");
+        duzenleButton.className = "secondary-button";
+        duzenleButton.textContent = "Düzenle";
 
-        aciklama.className =
-            "admin-duyuru-aciklama";
+        duzenleButton.addEventListener("click", function () {
+            duyuruDuzenle(duyuru);
+        });
 
-        aciklama.textContent =
-            duyuru.aciklama;
+        const silButton = document.createElement("button");
+        silButton.className = "secondary-button";
+        silButton.textContent = "Sil";
 
-
-        const duzenleButton =
-            document.createElement("button");
-
-        duzenleButton.className =
-            "secondary-button";
-
-        duzenleButton.textContent =
-            "Düzenle";
-
-        duzenleButton.addEventListener(
-            "click",
-            function () {
-                duyuruDuzenle(duyuru);
-            }
-        );
-
-
-        const silButton =
-            document.createElement("button");
-
-        silButton.className =
-            "secondary-button";
-
-        silButton.textContent =
-            "Sil";
-
-        silButton.addEventListener(
-            "click",
-            function () {
-                duyuruSil(duyuru.id);
-            }
-        );
-
+        silButton.addEventListener("click", function () {
+            duyuruSil(duyuru.id);
+        });
 
         kutu.appendChild(baslik);
         kutu.appendChild(tarih);
@@ -1076,7 +1226,6 @@ async function adminDuyurulariGetir() {
         kutu.appendChild(silButton);
 
         adminDuyuruList.appendChild(kutu);
-
     });
 }
 
@@ -1087,48 +1236,31 @@ async function adminDuyurulariGetir() {
 
 async function duyuruKaydet() {
 
-    const baslik =
-        duyuruBaslikInput.value.trim();
-
-    const aciklama =
-        duyuruAciklamaInput.value.trim();
-
-    const tarih =
-        duyuruTarihInput.value;
-
+    const baslik = duyuruBaslikInput.value.trim();
+    const aciklama = duyuruAciklamaInput.value.trim();
+    const tarih = duyuruTarihInput.value;
 
     duyuruMessage.textContent = "";
 
-
     if (!baslik) {
-        duyuruMessage.textContent =
-            "Duyuru başlığı gir.";
+        duyuruMessage.textContent = "Duyuru başlığı gir.";
         return;
     }
-
 
     if (!aciklama) {
-        duyuruMessage.textContent =
-            "Duyuru açıklaması gir.";
+        duyuruMessage.textContent = "Duyuru açıklaması gir.";
         return;
     }
-
 
     if (!tarih) {
-        duyuruMessage.textContent =
-            "Duyuru tarihi seç.";
+        duyuruMessage.textContent = "Duyuru tarihi seç.";
         return;
     }
 
-
     saveDuyuruButton.disabled = true;
-
-    duyuruMessage.textContent =
-        "Kaydediliyor...";
-
+    duyuruMessage.textContent = "Kaydediliyor...";
 
     let error = null;
-
 
     if (duzenlenenDuyuruId === null) {
 
@@ -1156,7 +1288,6 @@ async function duyuruKaydet() {
         error = result.error;
     }
 
-
     if (error) {
 
         console.error(
@@ -1165,19 +1296,16 @@ async function duyuruKaydet() {
         );
 
         duyuruMessage.textContent =
-            "Duyuru kaydedilemedi: " +
-            error.message;
+            "Duyuru kaydedilemedi: " + error.message;
 
         saveDuyuruButton.disabled = false;
         return;
     }
 
-
     duyuruMessage.textContent =
         duzenlenenDuyuruId === null
             ? "Duyuru başarıyla eklendi."
             : "Duyuru başarıyla güncellendi.";
-
 
     duyuruDuzenlemeyiIptalEt();
 
@@ -1194,8 +1322,7 @@ async function duyuruKaydet() {
 
 function duyuruDuzenle(duyuru) {
 
-    duzenlenenDuyuruId =
-        duyuru.id;
+    duzenlenenDuyuruId = duyuru.id;
 
     duyuruFormTitle.textContent =
         "Duyuruyu Düzenle";
@@ -1206,17 +1333,10 @@ function duyuruDuzenle(duyuru) {
     cancelDuyuruButton.style.display =
         "inline-block";
 
-    duyuruBaslikInput.value =
-        duyuru.baslik;
-
-    duyuruAciklamaInput.value =
-        duyuru.aciklama;
-
-    duyuruTarihInput.value =
-        duyuru.tarih;
-
-    duyuruMessage.textContent =
-        "";
+    duyuruBaslikInput.value = duyuru.baslik;
+    duyuruAciklamaInput.value = duyuru.aciklama;
+    duyuruTarihInput.value = duyuru.tarih;
+    duyuruMessage.textContent = "";
 
     duyuruBaslikInput.scrollIntoView({
         behavior: "smooth",
@@ -1254,24 +1374,19 @@ function duyuruDuzenlemeyiIptalEt() {
 
 async function duyuruSil(id) {
 
-    const onay =
-        confirm(
-            "Bu duyuru kalıcı olarak silinsin mi?"
-        );
-
+    const onay = confirm(
+        "Bu duyuru kalıcı olarak silinsin mi?"
+    );
 
     if (!onay) {
         return;
     }
 
-
-    const {
-        error
-    } = await supabaseClient
-        .rpc("duyuru_sil", {
-            p_id: id
-        });
-
+    const { error } =
+        await supabaseClient
+            .rpc("duyuru_sil", {
+                p_id: id
+            });
 
     if (error) {
 
@@ -1281,13 +1396,11 @@ async function duyuruSil(id) {
         );
 
         alert(
-            "Duyuru silinemedi: " +
-            error.message
+            "Duyuru silinemedi: " + error.message
         );
 
         return;
     }
-
 
     await duyurulariGetir();
     await adminDuyurulariGetir();
@@ -1300,21 +1413,20 @@ async function duyuruSil(id) {
 
 async function adminCikis() {
 
-    await supabaseClient
-        .auth
-        .signOut();
+    await supabaseClient.auth.signOut();
 
-    adminControls.style.display =
-        "none";
+    mevcutKullaniciAdminMi = false;
 
-    adminLoginBox.style.display =
-        "block";
+    adminControls.style.display = "none";
+    adminLoginBox.style.display = "block";
 
     adminEmail.value = "";
     adminPassword.value = "";
 
     adminMessage.textContent =
         "Yönetici çıkışı yapıldı.";
+
+    await duyurulariGetir();
 }
 
 
@@ -1351,16 +1463,6 @@ async function baslat() {
 
     adminPaneliniKontrolEt();
 
-    await duyurulariGetir();
-
-
-    if (
-        window.location.hash.toLowerCase() !== "#admin"
-    ) {
-        return;
-    }
-
-
     const {
         data: {
             session
@@ -1369,23 +1471,30 @@ async function baslat() {
         .auth
         .getSession();
 
+    ustCubuguGuncelle(session);
+
+    if (session && session.user) {
+
+        mevcutKullanici = session.user;
+        mevcutKullaniciAdminMi = await adminMi();
+    }
+
+    await duyurulariGetir();
+
+    if (
+        window.location.hash.toLowerCase() !== "#admin"
+    ) {
+        return;
+    }
 
     if (!session) {
         return;
     }
 
+    if (mevcutKullaniciAdminMi) {
 
-    const yetkili =
-        await adminMi();
-
-
-    if (yetkili) {
-
-        adminLoginBox.style.display =
-            "none";
-
-        adminControls.style.display =
-            "block";
+        adminLoginBox.style.display = "none";
+        adminControls.style.display = "block";
 
         await adminDuyurulariGetir();
     }
@@ -1405,13 +1514,11 @@ window.addEventListener(
 
         adminPaneliniKontrolEt();
 
-
         if (
             window.location.hash.toLowerCase() !== "#admin"
         ) {
             return;
         }
-
 
         const {
             data: {
@@ -1421,23 +1528,19 @@ window.addEventListener(
             .auth
             .getSession();
 
-
         if (!session) {
             return;
         }
 
-
-        const yetkili =
-            await adminMi();
-
+        const yetkili = await adminMi();
 
         if (yetkili) {
 
-            adminLoginBox.style.display =
-                "none";
+            mevcutKullanici = session.user;
+            mevcutKullaniciAdminMi = true;
 
-            adminControls.style.display =
-                "block";
+            adminLoginBox.style.display = "none";
+            adminControls.style.display = "block";
 
             await adminDuyurulariGetir();
         }
