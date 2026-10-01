@@ -550,6 +550,29 @@ async function kayitOl() {
         }
 
 
+        /*
+         * Supabase, mevcut bir e-posta ile tekrar
+         * kayıt denenmesi durumunda bazı durumlarda
+         * error döndürmez.
+         *
+         * Böyle bir durumda identities boş olur.
+         */
+
+        if (
+            data.user &&
+            Array.isArray(data.user.identities) &&
+            data.user.identities.length === 0
+        ) {
+
+            authMessage.textContent =
+                "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı dene.";
+
+            mesgulYap(false);
+
+            return;
+        }
+
+
         if (!data.session) {
 
             /* E-posta doğrulaması açıksa oturum hemen başlamaz */
