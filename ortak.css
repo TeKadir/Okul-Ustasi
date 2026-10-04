@@ -1,0 +1,644 @@
+/* =========================================================
+   OKUL USTASI - ORTAK STİL (ortak.css)
+   Tüm sayfalarda ortak olan: üst menü, sol panel, karanlık tema.
+   Sayfaların kendi <style> bloklarına dokunmaz; karanlık tema
+   mevcut sınıfların üzerine "html[data-tema="dark"]" ile biner.
+========================================================= */
+
+:root {
+    --ou-kagit: #fffdf5;
+    --ou-yazi: #222;
+    --ou-cizgi: #222;
+    --ou-vurgu: #fff19a;
+    --ou-yuzey: #ffffff;
+    --ou-soluk: #666;
+    --ou-golge: #222;
+}
+
+html[data-tema="dark"] {
+    color-scheme: dark;
+
+    --ou-kagit: #1d1c24;
+    --ou-yazi: #ebe8df;
+    --ou-cizgi: #8d8a96;
+    --ou-vurgu: #5c5113;
+    --ou-yuzey: #272631;
+    --ou-soluk: #a9a5b3;
+    --ou-golge: #0c0b10;
+
+    /* ders-yardimi.html'in kendi değişkenleri */
+    --kagit: #1d1c24;
+    --metin: #ebe8df;
+    --vurgu: #5c5113;
+    --vurgu-koyu: #8a7a1f;
+}
+
+
+/* =========================================================
+   ÜST MENÜ
+========================================================= */
+
+.ou-ust {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 10px 16px;
+
+    background: var(--ou-kagit);
+    color: var(--ou-yazi);
+    border-bottom: 2px solid var(--ou-cizgi);
+
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+}
+
+.ou-sol,
+.ou-sag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.ou-panel-ac,
+.ou-tema,
+.ou-giris,
+.ou-cikis {
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.2;
+    color: var(--ou-yazi);
+    background: var(--ou-yuzey);
+    border: 2px solid var(--ou-cizgi);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--ou-golge);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.ou-panel-ac:hover,
+.ou-tema:hover,
+.ou-giris:hover,
+.ou-cikis:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ou-golge);
+}
+
+.ou-panel-ac {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 12px;
+    font-weight: bold;
+    background: var(--ou-vurgu);
+}
+
+.ou-ikon {
+    display: inline-block;
+    position: relative;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+.ou-ikon::before,
+.ou-ikon::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+.ou-ikon::before { top: -6px; }
+.ou-ikon::after  { top: 6px; }
+
+.ou-marka {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--ou-yazi);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ou-giris {
+    display: none;
+    padding: 8px 14px;
+    font-weight: bold;
+    background: var(--ou-vurgu);
+}
+
+/* Eski sayfa scriptleri bu elemanların display değerini
+   satır içi olarak ayarlar; başlangıç durumu: ikisi de gizli. */
+.ou-ust #topLoginLink {
+    display: none;
+}
+
+.ou-ust #topUser {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px 3px 12px;
+    background: var(--ou-yuzey);
+    border: 2px solid var(--ou-cizgi);
+    border-radius: 999px;
+    min-width: 0;
+}
+
+.ou-ust #topUserEmail {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    color: var(--ou-yazi);
+}
+
+.ou-cikis {
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.ou-tema {
+    width: 40px;
+    height: 38px;
+    padding: 0;
+    font-size: 18px;
+}
+
+.ou-ust a:focus-visible,
+.ou-ust button:focus-visible,
+.ou-panel a:focus-visible,
+.ou-panel button:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   SOL PANEL
+========================================================= */
+
+.ou-yer {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.ou-yer.acik {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease;
+}
+
+.ou-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+
+    width: min(320px, 86vw);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 16px 16px 20px 44px;
+
+    background:
+        linear-gradient(
+            to right,
+            transparent 0,
+            transparent 29px,
+            rgba(232, 137, 137, 0.8) 30px,
+            transparent 32px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            var(--ou-kagit) 0px,
+            var(--ou-kagit) 31px,
+            #c9d8e6 32px
+        );
+
+    color: var(--ou-yazi);
+    border-right: 2px solid var(--ou-cizgi);
+    box-shadow: 6px 0 0 rgba(0, 0, 0, 0.25);
+
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform 0.28s ease, visibility 0s linear 0.28s;
+}
+
+.ou-panel.acik {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.28s ease;
+}
+
+html[data-tema="dark"] .ou-panel {
+    background:
+        linear-gradient(
+            to right,
+            transparent 0,
+            transparent 29px,
+            rgba(166, 90, 90, 0.8) 30px,
+            transparent 32px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            var(--ou-kagit) 0px,
+            var(--ou-kagit) 31px,
+            #2e3442 32px
+        );
+}
+
+.ou-panel-ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.ou-panel-baslik {
+    font-size: 22px;
+    font-weight: bold;
+    background: var(--ou-vurgu);
+    padding: 2px 10px;
+    transform: rotate(-1deg);
+}
+
+.ou-kapat {
+    width: 38px;
+    height: 36px;
+    font-family: inherit;
+    font-size: 18px;
+    color: var(--ou-yazi);
+    background: var(--ou-yuzey);
+    border: 2px solid var(--ou-cizgi);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.ou-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ou-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    font-size: 18px;
+    color: var(--ou-yazi);
+    text-decoration: none;
+    border: 2px solid transparent;
+    border-radius: 8px;
+}
+
+.ou-menu a:hover {
+    background: var(--ou-vurgu);
+    border-color: var(--ou-cizgi);
+}
+
+.ou-menu a.aktif {
+    background: var(--ou-vurgu);
+    border-color: var(--ou-cizgi);
+    box-shadow: 2px 2px 0 var(--ou-golge);
+    font-weight: bold;
+}
+
+.ou-menu .ou-m-ikon {
+    width: 26px;
+    text-align: center;
+}
+
+.ou-panel-hesap {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 2px dashed var(--ou-cizgi);
+}
+
+.ou-hesap-satir {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--ou-soluk);
+    word-break: break-all;
+}
+
+.ou-hesap-satir button,
+.ou-hesap-satir a {
+    align-self: flex-start;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--ou-yazi);
+    background: var(--ou-vurgu);
+    border: 2px solid var(--ou-cizgi);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--ou-golge);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+html.ou-panel-acik,
+html.ou-panel-acik body {
+    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+
+    .ou-ust {
+        padding: 8px 10px;
+    }
+
+    .ou-marka {
+        display: none;
+    }
+
+    .ou-ust #topUserEmail {
+        max-width: 90px;
+    }
+
+    .ou-panel-ac-yazi {
+        display: none;
+    }
+
+    .ou-panel {
+        width: min(320px, 88vw);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ou-yer,
+    .ou-panel {
+        transition: none !important;
+    }
+}
+
+
+/* =========================================================
+   KARANLIK TEMA  -  mevcut sınıfların üzerine biner
+   (D = html[data-tema="dark"])
+========================================================= */
+
+html[data-tema="dark"] body {
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #1d1c24 0px,
+            #1d1c24 31px,
+            #2e3442 32px
+        );
+    color: #ebe8df;
+}
+
+/* ders-yardimi.html tarzı sayfalarda kenar çizgisi body arka planında */
+html[data-tema="dark"] body.ou-hatli {
+    background:
+        linear-gradient(
+            to right,
+            transparent 0,
+            transparent 65px,
+            rgba(166, 90, 90, 0.7) 66px,
+            transparent 67px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            #1d1c24 0px,
+            #1d1c24 31px,
+            #2e3442 32px
+        );
+}
+
+html[data-tema="dark"] body::before {
+    background: #a65a5a;
+    opacity: 0.7;
+}
+
+/* Kartlar ve kutular */
+html[data-tema="dark"] .card,
+html[data-tema="dark"] .duyuru,
+html[data-tema="dark"] .form-karti,
+html[data-tema="dark"] .filtre-karti,
+html[data-tema="dark"] .gonderi,
+html[data-tema="dark"] .bos-liste,
+html[data-tema="dark"] .event-card,
+html[data-tema="dark"] .admin-event,
+html[data-tema="dark"] .admin-duyuru,
+html[data-tema="dark"] .event-form-box {
+    background: rgba(39, 38, 49, 0.94);
+    color: #ebe8df;
+    border-color: #6f6c7a;
+    box-shadow: 4px 4px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .gonderi {
+    border-left-color: #c9b440;
+}
+
+html[data-tema="dark"] .event-form-box,
+html[data-tema="dark"] .bos-liste {
+    border-style: dashed;
+}
+
+html[data-tema="dark"] .gonderi-alt,
+html[data-tema="dark"] .cevap-alani {
+    border-color: #6f6c7a;
+}
+
+html[data-tema="dark"] .admin-section {
+    border-top-color: #6f6c7a;
+}
+
+/* Formlar */
+html[data-tema="dark"] .input,
+html[data-tema="dark"] textarea.input,
+html[data-tema="dark"] .alan input,
+html[data-tema="dark"] .alan textarea,
+html[data-tema="dark"] .alan select,
+html[data-tema="dark"] .filtre-karti select,
+html[data-tema="dark"] .filtre-karti input,
+html[data-tema="dark"] .cevap-form textarea {
+    background: #15141b;
+    color: #ebe8df;
+    border-color: #8d8a96;
+}
+
+html[data-tema="dark"] ::placeholder {
+    color: #8f8b98;
+    opacity: 1;
+}
+
+html[data-tema="dark"] option {
+    background: #15141b;
+    color: #ebe8df;
+}
+
+/* Düğmeler */
+html[data-tema="dark"] .main-button {
+    background: #5c5113;
+    color: #fff6c2;
+    border-color: #d8c85a;
+    box-shadow: 3px 3px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .secondary-button,
+html[data-tema="dark"] .daha-buton,
+html[data-tema="dark"] .kucuk-buton {
+    background: #2f2e3a;
+    color: #ebe8df;
+    border-color: #8d8a96;
+    box-shadow: 2px 2px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .secondary-button:hover,
+html[data-tema="dark"] .daha-buton:hover {
+    background: #3b3a48;
+}
+
+html[data-tema="dark"] .gonder-buton {
+    color: #fff6c2;
+    border-color: #d8c85a;
+    box-shadow: 3px 3px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .ara-buton,
+html[data-tema="dark"] .cevaplari-buton {
+    background: #1f3a5c;
+    color: #ebe8df;
+    border-color: #8d8a96;
+    box-shadow: 2px 2px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .sil-buton,
+html[data-tema="dark"] .cevap-sil {
+    background: #5a2323;
+    color: #ffd9d9;
+    border-color: #c85a5a;
+}
+
+html[data-tema="dark"] .cevap-gonder {
+    background: #1f4d2e;
+    color: #dcfce7;
+    border-color: #8d8a96;
+    box-shadow: 2px 2px 0 #0c0b10;
+}
+
+/* Etiket, cevap, uyarı, mesaj */
+html[data-tema="dark"] .ders-etiket {
+    color: #fff6c2;
+    border-color: #d8c85a;
+}
+
+html[data-tema="dark"] .baslik-alani h1 {
+    color: #fff6c2;
+    border-color: #8d8a96;
+    box-shadow: 5px 5px 0 #0c0b10;
+}
+
+html[data-tema="dark"] .cevap {
+    background: #1f1e27;
+    border-color: #55525f;
+}
+
+html[data-tema="dark"] .giris-uyarisi,
+html[data-tema="dark"] .cevap-giris {
+    background: #3a3216;
+    border-color: #b59a2e;
+    color: #f5e9b5;
+}
+
+html[data-tema="dark"] .mesaj.basari {
+    background: #173a24;
+    border-color: #3f9d5f;
+    color: #d5f5e0;
+}
+
+html[data-tema="dark"] .mesaj.hata {
+    background: #4a1c1c;
+    border-color: #c85a5a;
+    color: #ffd9d9;
+}
+
+/* Soluk yazılar */
+html[data-tema="dark"] .duyuru-tarih,
+html[data-tema="dark"] .event-date,
+html[data-tema="dark"] .small-note,
+html[data-tema="dark"] .gonderi-tarih,
+html[data-tema="dark"] .cevap-tarih,
+html[data-tema="dark"] .karakter,
+html[data-tema="dark"] .gonderi-sahip,
+html[data-tema="dark"] .welcome-kicker,
+html[data-tema="dark"] .disclaimer,
+html[data-tema="dark"] .welcome-pause,
+html[data-tema="dark"] footer {
+    color: #a9a5b3;
+}
+
+html[data-tema="dark"] .disclaimer {
+    border-left-color: #8d8a96;
+}
+
+/* Vurgular */
+html[data-tema="dark"] .highlight {
+    background: rgba(255, 241, 154, 0.22);
+    color: inherit;
+}
+
+html[data-tema="dark"] .welcome-text {
+    color: #ebe8df;
+}
+
+html[data-tema="dark"] .welcome-text-inner {
+    background-image: linear-gradient(
+        transparent 62%,
+        rgba(255, 241, 154, 0.28) 62%,
+        rgba(255, 241, 154, 0.28) 92%,
+        transparent 92%
+    );
+}
+
+html[data-tema="dark"] .welcome-dot::before {
+    border-color: #bdb9c6;
+}
+
+html[data-tema="dark"] .welcome-dot.active::before {
+    background: #d9c24a;
+}
+
+/* Bağlantılar */
+html[data-tema="dark"] a:not([class]),
+html[data-tema="dark"] .back-link a,
+html[data-tema="dark"] .giris-uyarisi a {
+    color: #8ec1ff;
+}
+
+/* Gömülü video / görsel çerçeveleri */
+html[data-tema="dark"] iframe {
+    background: #000;
+}

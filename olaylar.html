@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Neler Oldu? - Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf5 0px,
+            #fffdf5 31px,
+            #c9d8e6 32px
+        );
+
+    font-family:
+        "Comic Sans MS",
+        "Segoe Print",
+        cursive;
+
+    color: #222;
+
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    left: 45px;
+    top: 0;
+    bottom: 0;
+
+    width: 2px;
+
+    background: #e88989;
+
+    opacity: 0.8;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   GENEL
+========================================================= */
+
+.container {
+    width:
+        min(
+            900px,
+            calc(100% - 70px)
+        );
+
+    margin:
+        35px auto;
+
+    padding:
+        25px
+        35px
+        40px
+        55px;
+}
+
+h1 {
+    text-align:
+        center;
+
+    font-size:
+        clamp(
+            25px,
+            5vw,
+            42px
+        );
+
+    margin-bottom:
+        15px;
+
+    transform:
+        rotate(-1deg);
+}
+
+h2 {
+    font-size:
+        25px;
+
+    margin-bottom:
+        10px;
+}
+
+h3 {
+    margin-bottom:
+        12px;
+}
+
+p {
+    font-size:
+        18px;
+
+    line-height:
+        1.7;
+}
+
+.card {
+    background:
+        rgba(
+            255,
+            255,
+            250,
+            0.75
+        );
+
+    border:
+        2px solid #333;
+
+    border-radius:
+        8px;
+
+    padding:
+        20px;
+
+    margin:
+        25px 0;
+
+    box-shadow:
+        4px 4px 0 #555;
+}
+
+
+/* =========================================================
+   BUTONLAR
+========================================================= */
+
+.main-button {
+    display:
+        inline-block;
+
+    background:
+        #fff19a;
+
+    border:
+        2px solid #222;
+
+    box-shadow:
+        3px 3px 0 #555;
+
+    padding:
+        12px 20px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        17px;
+
+    cursor:
+        pointer;
+
+    text-decoration:
+        none;
+
+    color:
+        #222;
+
+    transition:
+        0.15s;
+}
+
+.main-button:hover {
+    transform:
+        translate(
+            2px,
+            2px
+        );
+
+    box-shadow:
+        1px 1px 0 #555;
+}
+
+.secondary-button {
+    background:
+        #fff;
+
+    display:
+        inline-block;
+
+    border:
+        2px solid #333;
+
+    padding:
+        10px 16px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        16px;
+
+    cursor:
+        pointer;
+
+    margin:
+        4px;
+}
+
+.secondary-button:hover {
+    background:
+        #eee;
+}
+
+
+/* =========================================================
+   ÜST ÇUBUK
+========================================================= */
+
+.topbar {
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+    padding:
+        14px
+        20px
+        0
+        20px;
+}
+
+.topbar-left a {
+    color:
+        #222;
+}
+
+.topbar-right {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+}
+
+#topUserEmail {
+    font-size:
+        14px;
+
+    color:
+        #555;
+
+    max-width:
+        220px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* =========================================================
+   OLAYLAR
+========================================================= */
+
+.events-intro {
+    text-align:
+        center;
+}
+
+.event-card {
+    background:
+        #fff;
+
+    border:
+        2px solid #333;
+
+    padding:
+        18px;
+
+    margin:
+        18px 0;
+
+    box-shadow:
+        3px 3px 0 #777;
+}
+
+.event-card h3 {
+    margin-top:
+        0;
+
+    font-size:
+        21px;
+}
+
+.event-date {
+    color:
+        #666;
+
+    font-size:
+        15px;
+
+    margin-bottom:
+        12px;
+}
+
+.event-card p {
+    margin-bottom:
+        8px;
+}
+
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+#adminPanel {
+    display:
+        none;
+}
+
+#adminLoginBox {
+    display:
+        block;
+}
+
+#adminControls {
+    display:
+        none;
+}
+
+.admin-section {
+    margin-top:
+        30px;
+
+    padding-top:
+        20px;
+
+    border-top:
+        2px dashed #777;
+}
+
+.form-group {
+    margin-bottom:
+        15px;
+}
+
+.form-label {
+    display:
+        block;
+
+    font-size:
+        16px;
+
+    margin-bottom:
+        5px;
+}
+
+.input {
+    width:
+        100%;
+
+    padding:
+        11px;
+
+    border:
+        2px solid #333;
+
+    background:
+        #fff;
+
+    font-family:
+        inherit;
+
+    font-size:
+        16px;
+}
+
+textarea.input {
+    min-height:
+        100px;
+
+    resize:
+        vertical;
+}
+
+.form-message {
+    margin-top:
+        12px;
+
+    font-size:
+        15px;
+
+    min-height:
+        22px;
+}
+
+.small-note {
+    font-size:
+        14px;
+
+    color:
+        #666;
+
+    margin-top:
+        15px;
+}
+
+.event-form-box {
+    background:
+        #fff;
+
+    border:
+        2px dashed #333;
+
+    padding:
+        18px;
+
+    margin:
+        15px 0 25px 0;
+}
+
+.admin-event {
+    background:
+        #fff;
+
+    border:
+        2px solid #333;
+
+    padding:
+        15px;
+
+    margin:
+        15px 0;
+
+    box-shadow:
+        3px 3px 0 #777;
+}
+
+.admin-event strong {
+    font-size:
+        19px;
+}
+
+.admin-event-description {
+    margin-top:
+        10px;
+
+    white-space:
+        pre-wrap;
+
+    line-height:
+        1.6;
+
+    margin-bottom:
+        12px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    text-align:
+        center;
+
+    margin-top:
+        35px;
+
+    font-size:
+        13px;
+
+    color:
+        #777;
+}
+
+
+/* =========================================================
+   MOBİL
+========================================================= */
+
+@media (max-width: 600px) {
+
+    body::before {
+        left:
+            20px;
+    }
+
+    .container {
+        width:
+            calc(100% - 30px);
+
+        padding:
+            20px
+            15px
+            30px
+            30px;
+
+        margin:
+            20px auto;
+    }
+
+    p {
+        font-size:
+            16px;
+    }
+
+    h2 {
+        font-size:
+            22px;
+    }
+
+    .topbar {
+        padding:
+            10px
+            12px
+            0
+            30px;
+    }
+
+    #topUserEmail {
+        max-width:
+            140px;
+    }
+
+}
+
+</style>
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç"></button>
+    </div>
+
+</header>
+
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     BAŞLIK
+===================================================== -->
+
+<div class="card events-intro">
+
+    <h1>
+        Neler Oldu?
+    </h1>
+
+
+    <p>
+        Okul içinde daha önce kaydedilmiş
+        olayları burada görebilirsin.
+    </p>
+
+</div>
+
+
+
+<!-- =====================================================
+     SON OLAY
+===================================================== -->
+
+<div
+    class="card"
+    id="latestEventCard"
+>
+
+    <h2 id="latestEventTitle">
+        Olaylar yükleniyor...
+    </h2>
+
+
+    <div
+        class="event-date"
+        id="latestEventDate"
+    >
+    </div>
+
+
+    <div
+        id="latestEventDescription"
+    >
+
+        <p>
+            Olay bilgileri yükleniyor...
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TÜM OLAYLAR
+===================================================== -->
+
+<div class="card">
+
+    <h2>
+        Tüm Olaylar
+    </h2>
+
+
+    <p class="small-note">
+        Kayıtlı olaylar tarih sırasına göre
+        gösterilir.
+    </p>
+
+
+    <div
+        id="allEventsList"
+    >
+        Olaylar yükleniyor...
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ADMIN PANELİ
+===================================================== -->
+
+<div
+    class="card"
+    id="adminPanel"
+>
+
+    <h2>
+        Yönetici Paneli
+    </h2>
+
+
+    <!-- ADMIN LOGIN -->
+
+    <div
+        id="adminLoginBox"
+    >
+
+        <div class="form-group">
+
+            <label
+                class="form-label"
+                for="adminEmail"
+            >
+                Yönetici e-postası
+            </label>
+
+
+            <input
+                type="email"
+                id="adminEmail"
+                class="input"
+                autocomplete="username"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label
+                class="form-label"
+                for="adminPassword"
+            >
+                Yönetici şifresi
+            </label>
+
+
+            <input
+                type="password"
+                id="adminPassword"
+                class="input"
+                autocomplete="current-password"
+            >
+
+        </div>
+
+
+        <button
+            class="main-button"
+            id="adminLoginButton"
+        >
+            Yönetici Girişi
+        </button>
+
+
+        <div
+            id="adminMessage"
+            class="form-message"
+        ></div>
+
+    </div>
+
+
+
+    <!-- ADMIN KONTROLLER -->
+
+    <div
+        id="adminControls"
+    >
+
+
+        <div class="admin-section">
+
+            <h2>
+                Olay Yönetimi
+            </h2>
+
+
+            <p class="small-note">
+
+                Buradan yeni olay ekleyebilir,
+                mevcut olayları düzenleyebilir
+                veya silebilirsin.
+
+            </p>
+
+
+            <div
+                class="event-form-box"
+            >
+
+                <h3 id="eventFormTitle">
+                    Yeni Olay Ekle
+                </h3>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventTitleInput"
+                    >
+                        Olay başlığı
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="eventTitleInput"
+                        class="input"
+                        maxlength="150"
+                        placeholder="Olay başlığı"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventDateInput"
+                    >
+                        Olay tarihi
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="eventDateInput"
+                        class="input"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventDescriptionInput"
+                    >
+                        Olay açıklaması
+                    </label>
+
+
+                    <textarea
+                        id="eventDescriptionInput"
+                        class="input"
+                        maxlength="5000"
+                        placeholder="Olayı tarafsız şekilde açıklayın."
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    class="main-button"
+                    id="saveEventButton"
+                >
+                    Olayı Kaydet
+                </button>
+
+
+                <button
+                    class="secondary-button"
+                    id="cancelEventButton"
+                    style="display:none;"
+                >
+                    Düzenlemeyi İptal Et
+                </button>
+
+
+                <div
+                    id="eventMessage"
+                    class="form-message"
+                ></div>
+
+            </div>
+
+
+            <h3>
+                Kayıtlı Olaylar
+            </h3>
+
+
+            <div
+                id="adminEventList"
+            >
+                Olaylar yükleniyor...
+            </div>
+
+        </div>
+
+
+        <button
+            class="secondary-button"
+            id="adminLogoutButton"
+        >
+            Yönetici Çıkışı
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<footer>
+
+    Okul Ustası
+
+</footer>
+
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+    "https://hinisayolrgyzcoztobi.supabase.co";
+
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_76n3XsryMfvfdYwKeUu6SA_TCxImZiW";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =========================================================
+   ÜST ÇUBUK
+========================================================= */
+
+const topLoginLink =
+    document.getElementById(
+        "topLoginLink"
+    );
+
+const topUser =
+    document.getElementById(
+        "topUser"
+    );
+
+const topUserEmail =
+    document.getElementById(
+        "topUserEmail"
+    );
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+
+function ustCubuguGuncelle(
+    session
+) {
+
+    if (
+        session &&
+        session.user
+    ) {
+
+        topLoginLink.style.display =
+            "none";
+
+        topUser.style.display =
+            "flex";
+
+        topUserEmail.textContent =
+            session.user.email || "";
+
+    } else {
+
+        topLoginLink.style.display =
+            "inline-block";
+
+        topUser.style.display =
+            "none";
+
+        topUserEmail.textContent =
+            "";
+
+    }
+
+}
+
+
+logoutButton.addEventListener(
+    "click",
+    async function () {
+
+        await supabaseClient.auth.signOut();
+
+    }
+);
+
+
+supabaseClient.auth.onAuthStateChange(
+    function (
+        event,
+        session
+    ) {
+
+        ustCubuguGuncelle(
+            session
+        );
+
+    }
+);
+
+
+supabaseClient.auth.getSession().then(
+    function (result) {
+
+        ustCubuguGuncelle(
+            result.data.session
+        );
+
+    }
+);
+
+
+/* =========================================================
+   ELEMENTLER
+========================================================= */
+
+const latestEventTitle =
+    document.getElementById(
+        "latestEventTitle"
+    );
+
+const latestEventDate =
+    document.getElementById(
+        "latestEventDate"
+    );
+
+const latestEventDescription =
+    document.getElementById(
+        "latestEventDescription"
+    );
+
+const allEventsList =
+    document.getElementById(
+        "allEventsList"
+    );
+
+
+const adminPanel =
+    document.getElementById(
+        "adminPanel"
+    );
+
+const adminLoginBox =
+    document.getElementById(
+        "adminLoginBox"
+    );
+
+const adminControls =
+    document.getElementById(
+        "adminControls"
+    );
+
+const adminEmail =
+    document.getElementById(
+        "adminEmail"
+    );
+
+const adminPassword =
+    document.getElementById(
+        "adminPassword"
+    );
+
+const adminLoginButton =
+    document.getElementById(
+        "adminLoginButton"
+    );
+
+const adminMessage =
+    document.getElementById(
+        "adminMessage"
+    );
+
+const adminLogoutButton =
+    document.getElementById(
+        "adminLogoutButton"
+    );
+
+const adminEventList =
+    document.getElementById(
+        "adminEventList"
+    );
+
+const eventTitleInput =
+    document.getElementById(
+        "eventTitleInput"
+    );
+
+const eventDateInput =
+    document.getElementById(
+        "eventDateInput"
+    );
+
+const eventDescriptionInput =
+    document.getElementById(
+        "eventDescriptionInput"
+    );
+
+const eventFormTitle =
+    document.getElementById(
+        "eventFormTitle"
+    );
+
+const saveEventButton =
+    document.getElementById(
+        "saveEventButton"
+    );
+
+const cancelEventButton =
+    document.getElementById(
+        "cancelEventButton"
+    );
+
+const eventMessage =
+    document.getElementById(
+        "eventMessage"
+    );
+
+
+let duzenlenenOlayId =
+    null;
+
+
+/* =========================================================
+   TARİH
+========================================================= */
+
+function tarihiFormatla(
+    tarih
+) {
+
+    if (!tarih) {
+        return "";
+    }
+
+
+    const parcalar =
+        tarih.split("-");
+
+
+    if (
+        parcalar.length !== 3
+    ) {
+
+        return tarih;
+
+    }
+
+
+    return (
+        parcalar[2] +
+        "." +
+        parcalar[1] +
+        "." +
+        parcalar[0]
+    );
+
+}
+
+
+/* =========================================================
+   OLAYLARI GETİR
+========================================================= */
+
+async function olaylariGetir() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "olaylari_getir"
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Olaylar alınamadı:",
+            error
+        );
+
+
+        latestEventTitle.textContent =
+            "Olaylar alınamadı";
+
+
+        latestEventDate.textContent =
+            "";
+
+
+        latestEventDescription.innerHTML =
+            "<p>Olay bilgileri şu anda yüklenemiyor.</p>";
+
+
+        allEventsList.textContent =
+            "Olaylar yüklenemedi.";
+
+
+        return [];
+
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        latestEventTitle.textContent =
+            "Henüz olay kaydı yok";
+
+
+        latestEventDate.textContent =
+            "";
+
+
+        latestEventDescription.innerHTML =
+            "<p>Henüz kayıtlı bir olay bulunmuyor.</p>";
+
+
+        allEventsList.textContent =
+            "Henüz kayıtlı olay bulunmuyor.";
+
+
+        return [];
+
+    }
+
+
+    /* =====================================================
+       SON OLAY
+    ===================================================== */
+
+    const sonOlay =
+        data[0];
+
+
+    latestEventTitle.textContent =
+        sonOlay.baslik;
+
+
+    latestEventDate.textContent =
+        "Tarih: " +
+        tarihiFormatla(
+            sonOlay.tarih
+        );
+
+
+    latestEventDescription.innerHTML =
+        "";
+
+
+    sonOlay.aciklama
+        .split(/\n+/)
+        .forEach(
+            function (metin) {
+
+                if (
+                    !metin.trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                const p =
+                    document.createElement(
+                        "p"
+                    );
+
+
+                p.textContent =
+                    metin.trim();
+
+
+                latestEventDescription.appendChild(
+                    p
+                );
+
+            }
+        );
+
+
+    /* =====================================================
+       TÜM OLAYLAR
+    ===================================================== */
+
+    allEventsList.innerHTML =
+        "";
+
+
+    data.forEach(
+        function (olay) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "event-card";
+
+
+            const title =
+                document.createElement(
+                    "h3"
+                );
+
+
+            title.textContent =
+                olay.baslik;
+
+
+            const date =
+                document.createElement(
+                    "div"
+                );
+
+
+            date.className =
+                "event-date";
+
+
+            date.textContent =
+                "Tarih: " +
+                tarihiFormatla(
+                    olay.tarih
+                );
+
+
+            card.appendChild(
+                title
+            );
+
+
+            card.appendChild(
+                date
+            );
+
+
+            olay.aciklama
+                .split(/\n+/)
+                .forEach(
+                    function (metin) {
+
+                        if (
+                            !metin.trim()
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const p =
+                            document.createElement(
+                                "p"
+                            );
+
+
+                        p.textContent =
+                            metin.trim();
+
+
+                        card.appendChild(
+                            p
+                        );
+
+                    }
+                );
+
+
+            allEventsList.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    return data;
+
+}
+
+
+/* =========================================================
+   ADMIN KONTROLÜ
+========================================================= */
+
+async function adminMi() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "is_admin"
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Admin kontrolü:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    return data === true;
+
+}
+
+
+/* =========================================================
+   ADMIN PANELİNİ GÖSTER
+========================================================= */
+
+function adminPaneliniKontrolEt() {
+
+    if (
+        window.location.hash.toLowerCase()
+        === "#admin"
+    ) {
+
+        adminPanel.style.display =
+            "block";
+
+    } else {
+
+        adminPanel.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   ADMIN GİRİŞ
+========================================================= */
+
+async function adminGiris() {
+
+    const email =
+        adminEmail.value.trim();
+
+
+    const password =
+        adminPassword.value;
+
+
+    if (
+        !email ||
+        !password
+    ) {
+
+        adminMessage.textContent =
+            "E-posta ve şifre gir.";
+
+        return;
+
+    }
+
+
+    adminMessage.textContent =
+        "Giriş yapılıyor...";
+
+
+    adminLoginButton.disabled =
+        true;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .auth
+            .signInWithPassword({
+
+                email:
+                    email,
+
+                password:
+                    password
+
+            });
+
+
+    if (error) {
+
+        adminMessage.textContent =
+            "Giriş başarısız: " +
+            error.message;
+
+
+        adminLoginButton.disabled =
+            false;
+
+
+        return;
+
+    }
+
+
+    const yetkili =
+        await adminMi();
+
+
+    if (!yetkili) {
+
+        await supabaseClient
+            .auth
+            .signOut();
+
+
+        adminMessage.textContent =
+            "Bu hesap yönetici olarak yetkilendirilmemiş.";
+
+
+        adminLoginButton.disabled =
+            false;
+
+
+        return;
+
+    }
+
+
+    adminLoginBox.style.display =
+        "none";
+
+
+    adminControls.style.display =
+        "block";
+
+
+    adminMessage.textContent =
+        "";
+
+
+    adminLoginButton.disabled =
+        false;
+
+
+    await adminOlaylariGetir();
+
+}
+
+
+/* =========================================================
+   ADMIN OLAYLARI
+========================================================= */
+
+async function adminOlaylariGetir() {
+
+    adminEventList.textContent =
+        "Olaylar yükleniyor...";
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "olaylari_getir"
+            );
+
+
+    if (error) {
+
+        adminEventList.textContent =
+            "Olaylar alınamadı.";
+
+
+        console.error(
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        adminEventList.textContent =
+            "Henüz kayıtlı olay yok.";
+
+
+        return;
+
+    }
+
+
+    adminEventList.innerHTML =
+        "";
+
+
+    data.forEach(
+        function (olay) {
+
+            const box =
+                document.createElement(
+                    "div"
+                );
+
+
+            box.className =
+                "admin-event";
+
+
+            const title =
+                document.createElement(
+                    "strong"
+                );
+
+
+            title.textContent =
+                olay.baslik;
+
+
+            const date =
+                document.createElement(
+                    "div"
+                );
+
+
+            date.className =
+                "event-date";
+
+
+            date.textContent =
+                "Tarih: " +
+                tarihiFormatla(
+                    olay.tarih
+                );
+
+
+            const description =
+                document.createElement(
+                    "div"
+                );
+
+
+            description.className =
+                "admin-event-description";
+
+
+            description.textContent =
+                olay.aciklama;
+
+
+            const editButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            editButton.className =
+                "secondary-button";
+
+
+            editButton.textContent =
+                "Düzenle";
+
+
+            editButton.onclick =
+                function () {
+
+                    olayDuzenle(
+                        olay
+                    );
+
+                };
+
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.className =
+                "secondary-button";
+
+
+            deleteButton.textContent =
+                "Sil";
+
+
+            deleteButton.onclick =
+                function () {
+
+                    olaySil(
+                        olay.id
+                    );
+
+                };
+
+
+            box.appendChild(
+                title
+            );
+
+
+            box.appendChild(
+                date
+            );
+
+
+            box.appendChild(
+                description
+            );
+
+
+            box.appendChild(
+                editButton
+            );
+
+
+            box.appendChild(
+                deleteButton
+            );
+
+
+            adminEventList.appendChild(
+                box
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OLAY KAYDET / GÜNCELLE
+========================================================= */
+
+async function olayKaydet() {
+
+    const baslik =
+        eventTitleInput
+            .value
+            .trim();
+
+
+    const tarih =
+        eventDateInput
+            .value;
+
+
+    const aciklama =
+        eventDescriptionInput
+            .value
+            .trim();
+
+
+    if (!baslik) {
+
+        eventMessage.textContent =
+            "Olay başlığı gir.";
+
+        return;
+
+    }
+
+
+    if (!tarih) {
+
+        eventMessage.textContent =
+            "Olay tarihi seç.";
+
+        return;
+
+    }
+
+
+    if (!aciklama) {
+
+        eventMessage.textContent =
+            "Olay açıklaması gir.";
+
+        return;
+
+    }
+
+
+    eventMessage.textContent =
+        "Kaydediliyor...";
+
+
+    let error = null;
+
+
+    if (
+        duzenlenenOlayId ===
+        null
+    ) {
+
+        const result =
+            await supabaseClient
+                .rpc(
+                    "olay_ekle",
+                    {
+
+                        p_baslik:
+                            baslik,
+
+                        p_tarih:
+                            tarih,
+
+                        p_aciklama:
+                            aciklama
+
+                    }
+                );
+
+
+        error =
+            result.error;
+
+    } else {
+
+        const result =
+            await supabaseClient
+                .rpc(
+                    "olay_guncelle",
+                    {
+
+                        p_id:
+                            duzenlenenOlayId,
+
+                        p_baslik:
+                            baslik,
+
+                        p_tarih:
+                            tarih,
+
+                        p_aciklama:
+                            aciklama
+
+                    }
+                );
+
+
+        error =
+            result.error;
+
+    }
+
+
+    if (error) {
+
+        eventMessage.textContent =
+            "Olay kaydedilemedi: " +
+            error.message;
+
+
+        console.error(
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    eventMessage.textContent =
+        duzenlenenOlayId === null
+            ? "Yeni olay başarıyla eklendi."
+            : "Olay başarıyla güncellendi.";
+
+
+    olayDuzenlemeyiIptalEt();
+
+
+    await olaylariGetir();
+
+    await adminOlaylariGetir();
+
+}
+
+
+/* =========================================================
+   OLAY DÜZENLE
+========================================================= */
+
+function olayDuzenle(
+    olay
+) {
+
+    duzenlenenOlayId =
+        olay.id;
+
+
+    eventFormTitle.textContent =
+        "Olayı Düzenle";
+
+
+    saveEventButton.textContent =
+        "Değişiklikleri Kaydet";
+
+
+    cancelEventButton.style.display =
+        "inline-block";
+
+
+    eventTitleInput.value =
+        olay.baslik;
+
+
+    eventDateInput.value =
+        olay.tarih;
+
+
+    eventDescriptionInput.value =
+        olay.aciklama;
+
+
+    eventMessage.textContent =
+        "";
+
+
+    eventTitleInput.scrollIntoView({
+        behavior:
+            "smooth",
+
+        block:
+            "center"
+    });
+
+}
+
+
+/* =========================================================
+   DÜZENLEMEYİ İPTAL
+========================================================= */
+
+function olayDuzenlemeyiIptalEt() {
+
+    duzenlenenOlayId =
+        null;
+
+
+    eventFormTitle.textContent =
+        "Yeni Olay Ekle";
+
+
+    saveEventButton.textContent =
+        "Olayı Kaydet";
+
+
+    cancelEventButton.style.display =
+        "none";
+
+
+    eventTitleInput.value =
+        "";
+
+
+    eventDateInput.value =
+        "";
+
+
+    eventDescriptionInput.value =
+        "";
+
+
+    eventMessage.textContent =
+        "";
+
+}
+
+
+/* =========================================================
+   OLAY SİL
+========================================================= */
+
+async function olaySil(
+    id
+) {
+
+    const onay =
+        confirm(
+            "Bu olay kaydı kalıcı olarak silinsin mi?"
+        );
+
+
+    if (!onay) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "olay_sil",
+                {
+                    p_id:
+                        id
+                }
+            );
+
+
+    if (error) {
+
+        alert(
+            "Olay silinemedi: " +
+            error.message
+        );
+
+
+        return;
+
+    }
+
+
+    await olaylariGetir();
+
+    await adminOlaylariGetir();
+
+}
+
+
+/* =========================================================
+   ADMIN ÇIKIŞ
+========================================================= */
+
+async function adminCikis() {
+
+    await supabaseClient
+        .auth
+        .signOut();
+
+
+    adminControls.style.display =
+        "none";
+
+
+    adminLoginBox.style.display =
+        "block";
+
+
+    adminMessage.textContent =
+        "Yönetici çıkışı yapıldı.";
+
+}
+
+
+/* =========================================================
+   BUTONLAR
+========================================================= */
+
+adminLoginButton.addEventListener(
+    "click",
+    adminGiris
+);
+
+
+saveEventButton.addEventListener(
+    "click",
+    olayKaydet
+);
+
+
+cancelEventButton.addEventListener(
+    "click",
+    olayDuzenlemeyiIptalEt
+);
+
+
+adminLogoutButton.addEventListener(
+    "click",
+    adminCikis
+);
+
+
+/* =========================================================
+   BAŞLANGIÇ
+========================================================= */
+
+async function baslat() {
+
+    adminPaneliniKontrolEt();
+
+
+    await olaylariGetir();
+
+
+    const {
+        data: {
+            session
+        }
+    } =
+        await supabaseClient
+            .auth
+            .getSession();
+
+
+    if (
+        session &&
+        window.location.hash.toLowerCase()
+        === "#admin"
+    ) {
+
+        const yetkili =
+            await adminMi();
+
+
+        if (yetkili) {
+
+            adminLoginBox.style.display =
+                "none";
+
+
+            adminControls.style.display =
+                "block";
+
+
+            await adminOlaylariGetir();
+
+        }
+
+    }
+
+}
+
+
+baslat();
+
+
+/* =========================================================
+   HASH DEĞİŞİNCE
+========================================================= */
+
+window.addEventListener(
+    "hashchange",
+    async function () {
+
+        adminPaneliniKontrolEt();
+
+
+        if (
+            window.location.hash.toLowerCase()
+            !== "#admin"
+        ) {
+
+            return;
+
+        }
+
+
+        const yetkili =
+            await adminMi();
+
+
+        if (yetkili) {
+
+            adminLoginBox.style.display =
+                "none";
+
+
+            adminControls.style.display =
+                "block";
+
+
+            await adminOlaylariGetir();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   OLAYLARI PERİYODİK YENİLE
+========================================================= */
+
+setInterval(
+    olaylariGetir,
+    30000
+);
+
+</script>
+
+
+
+<script src="ortak.js"></script>
+
+</body>
+</html>

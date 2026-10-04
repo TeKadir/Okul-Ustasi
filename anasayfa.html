@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf5 0px,
+            #fffdf5 31px,
+            #c9d8e6 32px
+        );
+
+    font-family:
+        "Comic Sans MS",
+        "Segoe Print",
+        cursive;
+
+    color: #222;
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    left: 45px;
+    top: 0;
+    bottom: 0;
+
+    width: 2px;
+
+    background: #e88989;
+
+    opacity: 0.8;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   GENEL
+========================================================= */
+
+.container {
+    width: min(900px, calc(100% - 70px));
+
+    margin: 35px auto;
+
+    padding:
+        25px
+        35px
+        40px
+        55px;
+}
+
+h1 {
+    text-align: center;
+
+    font-size:
+        clamp(25px, 5vw, 42px);
+
+    margin-bottom: 15px;
+
+    transform:
+        rotate(-1deg);
+}
+
+h2 {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-bottom: 12px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.card {
+    background:
+        rgba(255, 255, 250, 0.75);
+
+    border:
+        2px solid #333;
+
+    border-radius:
+        8px;
+
+    padding:
+        20px;
+
+    margin:
+        25px 0;
+
+    box-shadow:
+        4px 4px 0 #555;
+}
+
+
+/* =========================================================
+   BUTON
+========================================================= */
+
+.main-button {
+    display:
+        inline-block;
+
+    background:
+        #fff19a;
+
+    border:
+        2px solid #222;
+
+    box-shadow:
+        3px 3px 0 #555;
+
+    padding:
+        12px 20px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        17px;
+
+    cursor:
+        pointer;
+
+    text-decoration:
+        none;
+
+    color:
+        #222;
+
+    transition:
+        0.15s;
+}
+
+.main-button:hover {
+    transform:
+        translate(2px, 2px);
+
+    box-shadow:
+        1px 1px 0 #555;
+}
+
+
+/* =========================================================
+   ÜST ÇUBUK
+========================================================= */
+
+.topbar {
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+    padding:
+        14px
+        20px
+        0
+        20px;
+}
+
+.topbar .main-button {
+    padding:
+        10px 22px;
+
+    font-weight:
+        bold;
+}
+
+#topUser {
+    display:
+        none;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+}
+
+#topUserEmail {
+    font-size:
+        14px;
+
+    color:
+        #555;
+
+    max-width:
+        220px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.secondary-button {
+    background:
+        #fff;
+
+    border:
+        2px solid #333;
+
+    padding:
+        10px 16px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        16px;
+
+    cursor:
+        pointer;
+}
+
+.secondary-button:hover {
+    background:
+        #eee;
+}
+
+
+/* =========================================================
+   KARŞILAMA
+========================================================= */
+
+.welcome {
+    min-height:
+        70vh;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+
+    padding:
+        30px
+        20px
+        30px
+        60px;
+}
+
+.welcome-inner {
+    width:
+        100%;
+
+    max-width:
+        860px;
+
+    margin:
+        0 auto;
+}
+
+.welcome-kicker {
+    font-size:
+        16px;
+
+    color:
+        #666;
+
+    margin:
+        0 0 14px 0;
+
+    letter-spacing:
+        0.5px;
+}
+
+.welcome-stage {
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+}
+
+.welcome-text {
+    display:
+        block;
+
+    width:
+        100%;
+
+    min-height:
+        2.7em;
+
+    margin:
+        0 auto 18px auto;
+
+    padding:
+        0;
+
+    background:
+        none;
+
+    border:
+        none;
+
+    font-family:
+        inherit;
+
+    font-size:
+        clamp(28px, 5.2vw, 48px);
+
+    font-weight:
+        bold;
+
+    line-height:
+        1.3;
+
+    color:
+        #222;
+}
+
+.welcome-text-inner {
+    display:
+        inline;
+
+    background-image:
+        linear-gradient(
+            transparent 62%,
+            #fff19a 62%,
+            #fff19a 92%,
+            transparent 92%
+        );
+
+    padding:
+        0 6px;
+
+    -webkit-box-decoration-break:
+        clone;
+
+    box-decoration-break:
+        clone;
+}
+
+.welcome-links {
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+}
+
+.welcome-links a {
+    text-decoration:
+        none;
+}
+
+.welcome-dots {
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    margin-top:
+        22px;
+}
+
+.welcome-dot {
+    position:
+        relative;
+
+    width:
+        26px;
+
+    height:
+        26px;
+
+    padding:
+        0;
+
+    background:
+        none;
+
+    border:
+        none;
+
+    cursor:
+        pointer;
+}
+
+.welcome-dot::before {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        50%;
+
+    left:
+        50%;
+
+    width:
+        11px;
+
+    height:
+        11px;
+
+    margin:
+        -5.5px 0 0 -5.5px;
+
+    border:
+        2px solid #333;
+
+    border-radius:
+        50%;
+
+    background:
+        transparent;
+}
+
+.welcome-dot.active::before {
+    background:
+        #fff19a;
+}
+
+.welcome-pause {
+    margin-top:
+        6px;
+
+    padding:
+        6px 10px;
+
+    background:
+        none;
+
+    border:
+        none;
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+
+    color:
+        #555;
+
+    text-decoration:
+        underline;
+
+    cursor:
+        pointer;
+}
+
+
+/* =========================================================
+   TANITIM
+========================================================= */
+
+.intro-card {
+    margin-top:
+        10px;
+}
+
+.highlight {
+    background:
+        #fff19a;
+
+    padding:
+        2px 5px;
+}
+
+.disclaimer {
+    font-size:
+        15px;
+
+    color:
+        #555;
+
+    border-left:
+        4px solid #777;
+
+    padding-left:
+        12px;
+}
+
+
+/* =========================================================
+   MOBİL
+========================================================= */
+
+@media (max-width: 600px) {
+
+    body::before {
+        left:
+            20px;
+    }
+
+    .container {
+        width:
+            calc(100% - 30px);
+
+        padding:
+            20px
+            15px
+            30px
+            30px;
+
+        margin:
+            20px auto;
+    }
+
+    p {
+        font-size:
+            16px;
+    }
+
+    h2 {
+        font-size:
+            22px;
+    }
+
+    .topbar {
+        padding:
+            10px
+            12px
+            0
+            30px;
+    }
+
+    #topUserEmail {
+        max-width:
+            140px;
+    }
+
+    .welcome {
+        min-height:
+            60vh;
+
+        padding:
+            24px
+            14px
+            24px
+            45px;
+    }
+
+    .welcome-text {
+        min-height:
+            3.9em;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .welcome-stage {
+        transition:
+            none;
+    }
+
+}
+
+</style>
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+<link rel="stylesheet" href="yeni.css">
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç">🌙</button>
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     KARŞILAMA
+===================================================== -->
+
+<section
+    class="welcome"
+    id="welcome"
+>
+
+    <div class="welcome-inner">
+
+        <div class="welcome-kicker">
+            Hoş geldin
+        </div>
+
+
+        <div
+            class="welcome-stage"
+            id="welcomeStage"
+        >
+
+            <div
+                class="welcome-text"
+                id="welcomeText"
+            >
+                <span
+                    class="welcome-text-inner"
+                    id="welcomeTextInner"
+                ></span>
+            </div>
+
+
+            <div
+                class="welcome-links"
+                id="welcomeLinks"
+            >
+            </div>
+
+        </div>
+
+
+        <div
+            class="welcome-dots"
+            id="welcomeDots"
+        >
+        </div>
+
+
+        <button
+            class="welcome-pause"
+            id="welcomePause"
+        >
+            Duraklat
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<div class="container">
+
+
+    <h1>
+        Okul Ustası
+    </h1>
+
+
+    <!-- =================================================
+         TANITIM
+    ================================================= -->
+
+    <div class="card intro-card">
+
+        <p>
+
+            Öğrencilerin kendi aralarında
+            <span class="highlight">
+                çalışabileceği,
+                öğrenebileceği ve iletişim kurabileceği
+            </span>
+            bir okul platformu.
+
+        </p>
+
+
+        <p class="disclaimer">
+
+            Bu platform öğrencilerin soru sorması,
+            bilgi paylaşması ve okul ile ilgili
+            içeriklere ulaşabilmesi için hazırlanmıştır.
+
+            Kullanıcıların
+            <span class="highlight">
+                saygılı ve sorumlu
+            </span>
+            davranması beklenir.
+
+        </p>
+
+    </div>
+
+
+    <!-- Kisayollar, hizli erisim, ornek icerikler, takvim/sohbet ozeti (anasayfa-ek.js) -->
+    <div id="ynAnasayfaEk"></div>
+
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+    "https://hinisayolrgyzcoztobi.supabase.co";
+
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_76n3XsryMfvfdYwKeUu6SA_TCxImZiW";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =========================================================
+   ÜST ÇUBUK
+========================================================= */
+
+const topLoginLink =
+    document.getElementById(
+        "topLoginLink"
+    );
+
+
+const topUser =
+    document.getElementById(
+        "topUser"
+    );
+
+
+const topUserEmail =
+    document.getElementById(
+        "topUserEmail"
+    );
+
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+
+function ustCubuguGuncelle(session) {
+
+    if (
+        session &&
+        session.user
+    ) {
+
+        topLoginLink.style.display =
+            "none";
+
+        topUser.style.display =
+            "flex";
+
+        topUserEmail.textContent =
+            session.user.email || "";
+
+    } else {
+
+        topLoginLink.style.display =
+            "inline-block";
+
+        topUser.style.display =
+            "none";
+
+        topUserEmail.textContent =
+            "";
+
+    }
+
+}
+
+
+logoutButton.addEventListener(
+    "click",
+    async function () {
+
+        await supabaseClient.auth.signOut();
+
+    }
+);
+
+
+supabaseClient.auth.onAuthStateChange(
+    function (event, session) {
+
+        ustCubuguGuncelle(session);
+
+    }
+);
+
+
+supabaseClient.auth.getSession().then(
+    function (result) {
+
+        ustCubuguGuncelle(
+            result.data.session
+        );
+
+    }
+);
+
+
+/* =========================================================
+   KARŞILAMA MESAJLARI
+========================================================= */
+
+const WELCOME_ITEMS = [
+
+    {
+        text:
+            "Bir sorunuz mu var?",
+
+        button:
+            "Ders Yardımı",
+
+        href:
+            "ders-yardimi.html"
+    },
+
+
+    {
+        text:
+            "Ödevde takıldığınız bir yer mi var?",
+
+        button:
+            "Ödev / Soru",
+
+        href:
+            "odev-soru.html"
+    },
+
+
+    {
+        text:
+            "Bir duyuru mu arıyorsunuz?",
+
+        button:
+            "Duyurular",
+
+        href:
+            "duyurular.html"
+    },
+
+
+    {
+        text:
+            "Bir konu hakkında yardım mı lazım?",
+
+        button:
+            "Konular",
+
+        href:
+            "konular.html"
+    },
+
+
+    {
+        text:
+            "Bir soru paylaşmak mı istiyorsunuz?",
+
+        button:
+            "Soru Oluştur",
+
+        href:
+            "soru-olustur.html"
+    },
+
+
+    {
+        text:
+            "Okulla ilgili bir problemi bildirmek mi istiyorsunuz?",
+
+        button:
+            "Bildirimler",
+
+        href:
+            "bildirimler.html"
+    },
+
+
+    {
+        text:
+            "Daha önce neler olduğunu mu görmek istiyorsunuz?",
+
+        button:
+            "Olaylar",
+
+        href:
+            "olaylar.html"
+    }
+
+];
+
+
+const WELCOME_INTERVAL =
+    5000;
+
+
+const WELCOME_FADE =
+    500;
+
+
+let welcomeIndex =
+    0;
+
+
+let welcomeTimer =
+    null;
+
+
+let welcomeChanging =
+    false;
+
+
+let welcomePaused =
+    false;
+
+
+/* =========================================================
+   ELEMENTLER
+========================================================= */
+
+const welcomeStage =
+    document.getElementById(
+        "welcomeStage"
+    );
+
+
+const welcomeTextInner =
+    document.getElementById(
+        "welcomeTextInner"
+    );
+
+
+const welcomeLinks =
+    document.getElementById(
+        "welcomeLinks"
+    );
+
+
+const welcomeDots =
+    document.getElementById(
+        "welcomeDots"
+    );
+
+
+const welcomePause =
+    document.getElementById(
+        "welcomePause"
+    );
+
+
+/* =========================================================
+   MESAJI GÖSTER
+========================================================= */
+
+function welcomeUygula(index) {
+
+    const item =
+        WELCOME_ITEMS[index];
+
+
+    welcomeIndex =
+        index;
+
+
+    welcomeTextInner.textContent =
+        item.text;
+
+
+    welcomeLinks.innerHTML =
+        "";
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        item.href;
+
+
+    link.className =
+        "main-button";
+
+
+    link.textContent =
+        item.button +
+        " →";
+
+
+    welcomeLinks.appendChild(
+        link
+    );
+
+
+    const dots =
+        welcomeDots.children;
+
+
+    for (
+        let i = 0;
+        i < dots.length;
+        i++
+    ) {
+
+        dots[i].classList.toggle(
+            "active",
+            i === index
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   GEÇİŞ
+========================================================= */
+
+function welcomeGecis(index) {
+
+    if (
+        welcomeChanging ||
+        index === welcomeIndex
+    ) {
+
+        return;
+
+    }
+
+
+    welcomeChanging =
+        true;
+
+
+    welcomeStage.style.opacity =
+        "0";
+
+
+    welcomeStage.style.transform =
+        "translateY(10px)";
+
+
+    setTimeout(
+        function () {
+
+            welcomeUygula(
+                index
+            );
+
+
+            welcomeStage.style.opacity =
+                "1";
+
+
+            welcomeStage.style.transform =
+                "translateY(0)";
+
+
+            welcomeChanging =
+                false;
+
+
+            welcomePlanla();
+
+        },
+        WELCOME_FADE
+    );
+
+}
+
+
+/* =========================================================
+   ZAMANLAYICI
+========================================================= */
+
+function welcomeTemizle() {
+
+    if (welcomeTimer) {
+
+        clearTimeout(
+            welcomeTimer
+        );
+
+        welcomeTimer =
+            null;
+
+    }
+
+}
+
+
+function welcomePlanla() {
+
+    welcomeTemizle();
+
+
+    if (welcomePaused) {
+        return;
+    }
+
+
+    welcomeTimer =
+        setTimeout(
+            function () {
+
+                welcomeGecis(
+                    (
+                        welcomeIndex + 1
+                    ) %
+                    WELCOME_ITEMS.length
+                );
+
+            },
+            WELCOME_INTERVAL
+        );
+
+}
+
+
+/* =========================================================
+   BAŞLAT
+========================================================= */
+
+WELCOME_ITEMS.forEach(
+    function (item, index) {
+
+        const dot =
+            document.createElement(
+                "button"
+            );
+
+
+        dot.type =
+            "button";
+
+
+        dot.className =
+            "welcome-dot";
+
+
+        dot.setAttribute(
+            "aria-label",
+            item.text
+        );
+
+
+        dot.addEventListener(
+            "click",
+            function () {
+
+                welcomeTemizle();
+
+
+                welcomeGecis(
+                    index
+                );
+
+
+                if (
+                    index ===
+                    welcomeIndex
+                ) {
+
+                    welcomePlanla();
+
+                }
+
+            }
+        );
+
+
+        welcomeDots.appendChild(
+            dot
+        );
+
+    }
+);
+
+
+welcomeUygula(0);
+
+
+welcomePause.addEventListener(
+    "click",
+    function () {
+
+        welcomePaused =
+            !welcomePaused;
+
+
+        welcomePause.textContent =
+            welcomePaused
+                ? "Devam ettir"
+                : "Duraklat";
+
+
+        welcomePlanla();
+
+    }
+);
+
+
+welcomePlanla();
+
+</script>
+
+
+
+<script src="anasayfa-ek.js"></script>
+<script src="ortak.js"></script>
+
+</body>
+</html>
