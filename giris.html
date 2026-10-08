@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Giriş Yap - Sınıf Düzeni ve Güvenlik Bildirimi</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* index.html ile aynı defter görünümü (kısaltılmış) */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf5 0px,
+            #fffdf5 31px,
+            #c9d8e6 32px
+        );
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+    color: #222;
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    left: 45px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e88989;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.container {
+    width: min(560px, calc(100% - 70px));
+    margin: 35px auto;
+    padding: 25px 20px 40px 55px;
+}
+
+h1 {
+    text-align: center;
+    font-size: clamp(25px, 5vw, 38px);
+    margin-bottom: 15px;
+    transform: rotate(-1deg);
+}
+
+h2 {
+    font-size: 25px;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.card {
+    background: rgba(255, 255, 250, 0.75);
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 4px 4px 0 #555;
+}
+
+.main-button {
+    display: inline-block;
+    background: #fff19a;
+    border: 2px solid #222;
+    box-shadow: 3px 3px 0 #555;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 17px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #222;
+    transition: 0.15s;
+}
+
+.main-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #555;
+}
+
+.secondary-button {
+    background: #fff;
+    display: inline-block;
+    border: 2px solid #333;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 4px;
+}
+
+.secondary-button:hover {
+    background: #eee;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.input {
+    width: 100%;
+    padding: 11px;
+    border: 2px solid #333;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.auth-buttons {
+    margin-top: 10px;
+}
+
+.form-message {
+    margin-top: 12px;
+    font-size: 15px;
+    min-height: 22px;
+}
+
+.small-note {
+    font-size: 14px;
+    color: #666;
+}
+
+.back-link {
+    text-align: center;
+    font-size: 16px;
+}
+
+.back-link a {
+    color: #222;
+}
+
+#authForm {
+    display: none;
+}
+
+
+@media (max-width: 600px) {
+
+    body::before {
+        left: 20px;
+    }
+
+    .container {
+        width: calc(100% - 30px);
+        padding: 20px 15px 30px 30px;
+        margin: 20px auto;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Hesabına Giriş Yap
+    </h1>
+
+
+    <div class="card">
+
+        <h2>
+            Giriş / Kayıt
+        </h2>
+
+        <!-- Oturum kontrolü sürerken gösterilir -->
+        <p
+            id="checkingText"
+            class="small-note"
+        >
+            Oturum kontrol ediliyor...
+        </p>
+
+
+        <form
+            id="authForm"
+            novalidate
+        >
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="emailInput"
+                >
+                    E-posta
+                </label>
+
+                <input
+                    type="email"
+                    id="emailInput"
+                    class="input"
+                    placeholder="E-posta adresin"
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="passwordInput"
+                >
+                    Şifre
+                </label>
+
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="input"
+                    placeholder="Şifren"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <div class="auth-buttons">
+
+                <button
+                    type="submit"
+                    class="main-button"
+                    id="loginButton"
+                >
+                    Giriş Yap
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="registerButton"
+                >
+                    Kayıt Ol
+                </button>
+
+            </div>
+
+
+            <div
+                id="authMessage"
+                class="form-message"
+                role="status"
+            ></div>
+
+        </form>
+
+    </div>
+
+
+    <p class="back-link">
+        <a href="index.html">&larr; Ana sayfaya dön</a>
+    </p>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE AYARLARI
+   (index.html ile aynı; URL yalnızca proje adresidir, API yolu içermez.
+    Yalnızca publishable key kullanılır, secret key konmaz.)
+========================================================= */
+
+const SUPABASE_URL =
+    "https://hinisayolrgyzcoztobi.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_76n3XsryMfvfdYwKeUu6SA_TCxImZiW";
+
+/* Başarılı giriş / zaten oturum açık ise gidilecek sayfa */
+const ANA_SAYFA =
+    "index.html";
+
+
+/* =========================================================
+   ELEMENTLER
+========================================================= */
+
+const checkingText =
+    document.getElementById("checkingText");
+
+const authForm =
+    document.getElementById("authForm");
+
+const emailInput =
+    document.getElementById("emailInput");
+
+const passwordInput =
+    document.getElementById("passwordInput");
+
+const loginButton =
+    document.getElementById("loginButton");
+
+const registerButton =
+    document.getElementById("registerButton");
+
+const authMessage =
+    document.getElementById("authMessage");
+
+
+let supabaseClient = null;
+
+
+/* =========================================================
+   YARDIMCI FONKSİYONLAR
+========================================================= */
+
+function mesgulYap(durum) {
+
+    loginButton.disabled = durum;
+
+    registerButton.disabled = durum;
+
+}
+
+
+function hataMetni(error) {
+
+    const mesaj =
+        (error && error.message
+            ? error.message
+            : ""
+        ).toLowerCase();
+
+
+    if (mesaj.includes("invalid login credentials")) {
+        return "E-posta veya şifre hatalı.";
+    }
+
+    if (mesaj.includes("email not confirmed")) {
+        return "E-posta adresin henüz doğrulanmamış. Gelen kutunu kontrol et.";
+    }
+
+    if (
+        mesaj.includes("rate limit") ||
+        mesaj.includes("too many")
+    ) {
+        return "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.";
+    }
+
+    if (mesaj.includes("at least 6")) {
+        return "Şifre en az 6 karakter olmalı.";
+    }
+
+    return error && error.message
+        ? error.message
+        : "Bilinmeyen bir hata oluştu.";
+}
+
+
+function anaSayfayaGit() {
+
+    /* replace: geri tuşuyla giriş sayfasına dönülmesin */
+
+    window.location.replace(ANA_SAYFA);
+
+}
+
+
+/* =========================================================
+   GİRİŞ
+========================================================= */
+
+async function girisYap(olay) {
+
+    if (olay) {
+        olay.preventDefault();
+    }
+
+
+    const email =
+        emailInput.value.trim();
+
+    const password =
+        passwordInput.value;
+
+
+    authMessage.textContent = "";
+
+
+    if (!email || !password) {
+
+        authMessage.textContent =
+            "E-posta ve şifre gir.";
+
+        return;
+    }
+
+
+    mesgulYap(true);
+
+    authMessage.textContent =
+        "Giriş yapılıyor...";
+
+
+    try {
+
+        const {
+            error
+        } = await supabaseClient
+            .auth
+            .signInWithPassword({
+
+                email: email,
+
+                password: password
+
+            });
+
+
+        if (error) {
+
+            authMessage.textContent =
+                "Giriş başarısız: " +
+                hataMetni(error);
+
+            mesgulYap(false);
+
+            return;
+        }
+
+
+        authMessage.textContent =
+            "Giriş başarılı. Yönlendiriliyorsun...";
+
+        anaSayfayaGit();
+
+    } catch (e) {
+
+        console.error(e);
+
+        authMessage.textContent =
+            "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
+
+        mesgulYap(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   KAYIT OL
+========================================================= */
+
+async function kayitOl() {
+
+    const email =
+        emailInput.value.trim();
+
+    const password =
+        passwordInput.value;
+
+
+    authMessage.textContent = "";
+
+
+    if (!email || !password) {
+
+        authMessage.textContent =
+            "E-posta ve şifre gir.";
+
+        return;
+    }
+
+
+    if (password.length < 6) {
+
+        authMessage.textContent =
+            "Şifre en az 6 karakter olmalı.";
+
+        return;
+    }
+
+
+    mesgulYap(true);
+
+    authMessage.textContent =
+        "Kayıt oluşturuluyor...";
+
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .auth
+            .signUp({
+
+                email: email,
+
+                password: password
+
+            });
+
+
+        if (error) {
+
+            authMessage.textContent =
+                "Kayıt başarısız: " +
+                hataMetni(error);
+
+            mesgulYap(false);
+
+            return;
+        }
+
+
+        /*
+         * Supabase, mevcut bir e-posta ile tekrar
+         * kayıt denenmesi durumunda bazı durumlarda
+         * error döndürmez.
+         *
+         * Böyle bir durumda identities boş olur.
+         */
+
+        if (
+            data.user &&
+            Array.isArray(data.user.identities) &&
+            data.user.identities.length === 0
+        ) {
+
+            authMessage.textContent =
+                "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı dene.";
+
+            mesgulYap(false);
+
+            return;
+        }
+
+
+        if (!data.session) {
+
+            /* E-posta doğrulaması açıksa oturum hemen başlamaz */
+
+            authMessage.textContent =
+                "Kayıt oluşturuldu. E-posta adresini doğruladıktan sonra giriş yap.";
+
+            mesgulYap(false);
+
+            return;
+        }
+
+
+        authMessage.textContent =
+            "Kayıt başarılı. Yönlendiriliyorsun...";
+
+        anaSayfayaGit();
+
+    } catch (e) {
+
+        console.error(e);
+
+        authMessage.textContent =
+            "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
+
+        mesgulYap(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   BAŞLANGIÇ
+   Oturum zaten açıksa giriş formu yerine ana sayfaya yönlendir.
+========================================================= */
+
+async function baslat() {
+
+    if (!window.supabase) {
+
+        checkingText.textContent =
+            "Giriş sistemi yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.";
+
+        return;
+    }
+
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+
+    try {
+
+        const {
+            data: {
+                session
+            }
+        } = await supabaseClient
+            .auth
+            .getSession();
+
+
+        if (session) {
+
+            checkingText.textContent =
+                "Zaten giriş yapmışsın. Ana sayfaya yönlendiriliyorsun...";
+
+            anaSayfayaGit();
+
+            return;
+        }
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
+
+
+    checkingText.style.display =
+        "none";
+
+    authForm.style.display =
+        "block";
+
+}
+
+
+authForm.addEventListener(
+    "submit",
+    girisYap
+);
+
+registerButton.addEventListener(
+    "click",
+    kayitOl
+);
+
+
+baslat();
+
+</script>
+
+</body>
+</html>
