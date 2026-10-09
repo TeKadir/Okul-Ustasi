@@ -638,7 +638,16 @@
         }
 
         .ders-ikon {
-            font-size: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .ders-svg {
+            width: 28px;
+            height: 28px;
         }
 
         .ders-sayi {
@@ -840,7 +849,7 @@ try {
         </div>
 
         <button type="button" class="ou-tema" id="ouTemaDugme"
-                aria-label="Karanlık temaya geç">🌙</button>
+                aria-label="Karanlık temaya geç"></button>
     </div>
 
 </header>
@@ -1019,14 +1028,34 @@ const YEDEK_DERSLER = [
 ];
 
 const DERS_IKONLARI = {
-    "Matematik": "",
-    "Fen Bilimleri": "",
-    "Türkçe": "",
-    "İngilizce": "",
-    "İnkılap Tarihi": "",
-    "Din Kültürü": "",
-    "Diğer": ""
+    "Matematik": '<path d="M5 12h14M12 5v0M12 19v0"/><circle cx="12" cy="6" r="1.2"/><circle cx="12" cy="18" r="1.2"/>',
+    "Fen Bilimleri": '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8"/>',
+    "Türkçe": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M9 8h6M9 12h4"/>',
+    "İngilizce": '<path d="M4 7h9M8.5 4v3M6 7c.5 3 3 6 6 7M12 7c-.5 3-3 6-6 7M13 20l4-9 4 9M14.5 17h5"/>',
+    "İnkılap Tarihi": '<path d="M3 9l9-5 9 5M5 9v9M9.5 9v9M14.5 9v9M19 9v9M3 20h18"/>',
+    "Din Kültürü": '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5zM17 4v4M15 6h4"/>',
+    "Diğer": '<path d="M12 3l2.5 5.5 5.5.8-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.5-.8z"/>'
 };
+
+const VARSAYILAN_DERS_IKONU =
+    '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/>';
+
+function dersIkonu(ders) {
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "ders-svg");
+    svg.innerHTML = DERS_IKONLARI[ders] || VARSAYILAN_DERS_IKONU;
+
+    return svg;
+}
 
 let mevcutKullanici = null;
 let adminMi = false;
@@ -1183,7 +1212,9 @@ function dersDugmeleriniCiz() {
         const dugme = eleman("button", "ders-dugme" + (d === seciliDers ? " secili" : ""));
         dugme.type = "button";
 
-        dugme.appendChild(eleman("span", "ders-ikon", DERS_IKONLARI[d] || "📚"));
+        const ikonKap = eleman("span", "ders-ikon");
+        ikonKap.appendChild(dersIkonu(d));
+        dugme.appendChild(ikonKap);
         dugme.appendChild(eleman("span", null, d));
         dugme.appendChild(eleman("span", "ders-sayi", sayi + " video"));
 

@@ -344,7 +344,7 @@ try {
         </div>
 
         <button type="button" class="ou-tema" id="ouTemaDugme"
-                aria-label="Karanlık temaya geç">🌙</button>
+                aria-label="Karanlık temaya geç"></button>
     </div>
 
 </header>
@@ -1127,12 +1127,7 @@ async function adminGiris() {
     adminLoginButton.disabled = true;
 
     const { error } =
-        await supabaseClient
-            .auth
-            .signInWithPassword({
-                email: email,
-                password: password
-            });
+        await ouSifre.girisDene(supabaseClient, email, password);
 
     if (error) {
 
@@ -1576,6 +1571,7 @@ setInterval(
 </script>
 
 
+<script src="sifre.js"></script>
 <script src="ortak.js"></script>
 
 </body>

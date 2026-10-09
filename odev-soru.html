@@ -835,7 +835,7 @@ try {
         </div>
 
         <button type="button" class="ou-tema" id="ouTemaDugme"
-                aria-label="Karanlık temaya geç">🌙</button>
+                aria-label="Karanlık temaya geç"></button>
     </div>
 
 </header>
@@ -862,7 +862,23 @@ try {
              GÖNDERİ FORMU
         ================================================= -->
 
-        <section class="form-karti">
+        <!-- Form varsayılan olarak kapalı; bu düğmeyle açılır -->
+        <div class="form-ac-satir">
+            <button type="button" class="form-ac-buton" id="formAcButonu"
+                    aria-expanded="false" aria-controls="formKarti">
+                <svg class="ou-svg ac-ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <svg class="ou-svg kapa-ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18"/>
+                </svg>
+                <span id="formAcYazi" data-kapali="Yeni ödev paylaş" data-acik="Formu kapat">Yeni ödev paylaş</span>
+            </button>
+        </div>
+
+        <section class="form-karti form-gizli" id="formKarti">
 
             <h2>Yeni ödev paylaş</h2>
 
@@ -949,7 +965,7 @@ try {
                         </label>
 
                         <label class="foto-sec-buton" for="gorselSec">
-                            📷 Fotoğraf ekle
+                            <svg class="ou-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg> Fotoğraf ekle
                         </label>
 
                         <input
@@ -1513,7 +1529,8 @@ function onizlemeCiz() {
         img.src = g.onizleme;
         img.alt = "Seçilen fotoğraf " + (index + 1);
 
-        const sil = eleman("button", "onizleme-sil", "✕");
+        const sil = eleman("button", "onizleme-sil");
+        sil.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
         sil.type = "button";
         sil.setAttribute("aria-label", "Fotoğrafı kaldır");
 
@@ -3248,6 +3265,28 @@ baslat();
 </script>
 
 
+<script>
+/* Paylaşım formu başta kapalı; düğme açıp kapatır.
+   Form DOM'da kalır, sayfanın kendi kodu aynen çalışır. */
+(function () {
+    var d = document.getElementById("formAcButonu");
+    var k = document.getElementById("formKarti");
+    var y = document.getElementById("formAcYazi");
+    if (!d || !k || !y) { return; }
+
+    d.addEventListener("click", function () {
+        var ac = !k.classList.contains("form-acik");
+        k.classList.toggle("form-acik", ac);
+        d.setAttribute("aria-expanded", ac ? "true" : "false");
+        y.textContent = ac ? y.getAttribute("data-acik") : y.getAttribute("data-kapali");
+        if (ac) {
+            k.scrollIntoView({ behavior: "smooth", block: "start" });
+            var ilk = k.querySelector("select, input:not([type=hidden]), textarea");
+            if (ilk) { ilk.focus({ preventScroll: true }); }
+        }
+    });
+})();
+</script>
 <script src="ortak.js"></script>
 
 </body>

@@ -656,3 +656,50 @@ html[data-tema="dark"] .giris-uyarisi a {
 html[data-tema="dark"] iframe {
     background: #000;
 }
+
+
+/* =========================================================
+   PAYLAŞIM FORMU AÇ/KAPA DÜĞMESİ (odev-soru, soru-olustur)
+========================================================= */
+
+.form-gizli:not(.form-acik) {
+    display: none;
+}
+
+.form-ac-satir {
+    margin: 0 0 22px;
+}
+
+.form-ac-buton {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--ou-yazi);
+    background: var(--ou-vurgu);
+    border: 2px solid var(--ou-cizgi);
+    box-shadow: 4px 4px 0 var(--ou-golge);
+    cursor: pointer;
+}
+
+.form-ac-buton:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ou-golge);
+}
+
+.form-ac-buton:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.form-ac-buton .kapa-ikon,
+.form-ac-buton[aria-expanded="true"] .ac-ikon {
+    display: none;
+}
+
+.form-ac-buton[aria-expanded="true"] .kapa-ikon {
+    display: inline-block;
+}

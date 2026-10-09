@@ -53,6 +53,7 @@
         bayrak:  '<path d="M5 21V4M5 5h12l-2 4 2 4H5"/>',
         takvim:  '<path d="M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 3v4M16 3v4"/>',
         sohbet:  '<path d="M4 5h16v11H9l-5 4zM8 9h8M8 12h5"/>',
+        kapat:   '<path d="M6 6l12 12M18 6L6 18"/>',
         ay:      '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
         gunes:   '<path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
     };
@@ -266,7 +267,8 @@
 
         ust.appendChild(eleman("span", "ou-panel-baslik", "Okul Ustası"));
 
-        kapatDugmesi = eleman("button", "ou-kapat", "✕");
+        kapatDugmesi = eleman("button", "ou-kapat");
+        kapatDugmesi.appendChild(svgIkon("kapat"));
         kapatDugmesi.type = "button";
         kapatDugmesi.setAttribute("aria-label", "Menüyü kapat");
 

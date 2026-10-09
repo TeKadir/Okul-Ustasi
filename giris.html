@@ -503,44 +503,6 @@ const ANA_SAYFA =
 
 
 /* =========================================================
-   ŞİFRE HASH'LEME (64 tur SHA-256)
-   Ham şifre tarayıcıdan çıkmaz. Supabase Auth'a, şifreden
-   türetilen 64 karakterlik hash gönderilir; Supabase bunu
-   ayrıca bcrypt ile saklar (auth.users).
-   DİKKAT: Sabit değerler sonradan değişirse tüm hesapların
-   girişi bozulur. Değiştirme.
-========================================================= */
-
-const HASH_TUR = 64;
-const HASH_TUZ = "okul-ustasi-v1";
-
-async function sha256Hex(metin) {
-
-    const bayt = new TextEncoder().encode(metin);
-    const ozet = await crypto.subtle.digest("SHA-256", bayt);
-
-    return Array.from(new Uint8Array(ozet))
-        .map(function (b) { return b.toString(16).padStart(2, "0"); })
-        .join("");
-}
-
-async function sifreHashle(sifre) {
-
-    if (!window.crypto || !crypto.subtle) {
-        throw new Error("HASH_YOK");
-    }
-
-    let h = HASH_TUZ + ":" + sifre;
-
-    for (let i = 0; i < HASH_TUR; i++) {
-        h = await sha256Hex(h + ":" + HASH_TUZ);
-    }
-
-    return h;
-}
-
-
-/* =========================================================
    ELEMENTLER
 ========================================================= */
 
@@ -656,38 +618,7 @@ async function girisYap(olay) {
 
     try {
 
-        const hash = await sifreHashle(sifre);
-
-        let { error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: hash
-        });
-
-        /* Eski hesaplar: şifre henüz hash'siz kayıtlıysa bir kez ham
-           şifreyle dene, başarılıysa hesabı otomatik hash'e taşı. */
-        if (error && /invalid login credentials/i.test(error.message || "")) {
-
-            const eski = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: sifre
-            });
-
-            if (!eski.error) {
-
-                const guncel = await supabaseClient.auth.updateUser({
-                    password: hash
-                });
-
-                if (guncel.error) {
-                    console.error(guncel.error);
-                }
-
-                error = null;
-
-            } else {
-                error = eski.error;
-            }
-        }
+        const { error } = await ouSifre.girisDene(supabaseClient, email, sifre);
 
         if (error) {
             girisMesaj.textContent = "Giriş başarısız: " + hataMetni(error);
@@ -775,7 +706,7 @@ async function kayitOl(olay) {
             return;
         }
 
-        const hash = await sifreHashle(sifre);
+        const hash = await ouSifre.hashle(sifre);
 
         const { data, error } = await supabaseClient.auth.signUp({
             email: email,
@@ -904,6 +835,7 @@ baslat();
 </script>
 
 
+<script src="sifre.js"></script>
 <script src="ortak.js"></script>
 
 </body>

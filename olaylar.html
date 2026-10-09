@@ -1507,17 +1507,7 @@ async function adminGiris() {
     const {
         error
     } =
-        await supabaseClient
-            .auth
-            .signInWithPassword({
-
-                email:
-                    email,
-
-                password:
-                    password
-
-            });
+        await ouSifre.girisDene(supabaseClient, email, password);
 
 
     if (error) {
@@ -2228,6 +2218,7 @@ setInterval(
 
 
 
+<script src="sifre.js"></script>
 <script src="ortak.js"></script>
 
 </body>
