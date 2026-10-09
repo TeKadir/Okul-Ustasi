@@ -157,7 +157,122 @@ button:disabled {
     color: #222;
 }
 
-#authForm {
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 17px;
+    color: var(--ou-yazi, #222);
+    background: var(--ou-yuzey, #fff);
+    border: 2px solid var(--ou-cizgi, #333);
+    cursor: pointer;
+}
+
+.auth-tab[aria-selected="true"] {
+    background: var(--ou-vurgu, #fff19a);
+    font-weight: bold;
+    box-shadow: 2px 2px 0 var(--ou-golge, #555);
+}
+
+.auth-panel[hidden] {
+    display: none;
+}
+
+.ikon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    vertical-align: -3px;
+}
+
+.main-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Okudum ve anladım düğmesi */
+.onay-satir {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.onay-linkler {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.onay-linkler a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 12px;
+    color: inherit;
+    font-weight: bold;
+}
+
+.onay-buton {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    text-align: left;
+    color: var(--ou-yazi, #222);
+    background: var(--ou-yuzey, #fff);
+    border: 2px solid var(--ou-cizgi, #333);
+    box-shadow: 2px 2px 0 var(--ou-golge, #555);
+    cursor: pointer;
+}
+
+.onay-kutu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    border: 2px solid var(--ou-cizgi, #333);
+    background: var(--ou-yuzey, #fff);
+}
+
+.onay-kutu svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+}
+
+.onay-buton[aria-pressed="true"] {
+    background: var(--ou-vurgu, #fff19a);
+    font-weight: bold;
+}
+
+.onay-buton[aria-pressed="true"] .onay-kutu svg {
+    opacity: 1;
+}
+
+.onay-buton:focus-visible,
+.auth-tab:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.onay-buton.uyar {
+    border-color: #b42318;
+}
+
+#authContent {
     display: none;
 }
 
@@ -185,10 +300,42 @@ button:disabled {
 }
 
 </style>
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
 </head>
 
 
 <body>
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç"></button>
+    </div>
+
+</header>
 
 <div class="container">
 
@@ -199,98 +346,139 @@ button:disabled {
 
     <div class="card">
 
-        <h2>
-            Giriş / Kayıt
-        </h2>
+        <div class="auth-tabs" role="tablist" aria-label="Giriş veya kayıt">
+            <button type="button" class="auth-tab" id="tabGiris"
+                    role="tab" aria-selected="true" aria-controls="panelGiris">Giriş Yap</button>
+            <button type="button" class="auth-tab" id="tabKayit"
+                    role="tab" aria-selected="false" aria-controls="panelKayit">Kayıt Ol</button>
+        </div>
 
         <!-- Oturum kontrolü sürerken gösterilir -->
-        <p
-            id="checkingText"
-            class="small-note"
-        >
-            Oturum kontrol ediliyor...
-        </p>
+        <p id="checkingText" class="small-note">Oturum kontrol ediliyor...</p>
+
+        <div id="authContent">
+
+            <!-- ================= GİRİŞ ================= -->
+            <section class="auth-panel" id="panelGiris" role="tabpanel" aria-labelledby="tabGiris">
+
+                <h2>Giriş Yap</h2>
+
+                <form id="girisForm" novalidate>
+
+                    <div class="form-group">
+                        <label class="form-label" for="girisEmail">E-posta</label>
+                        <input type="email" id="girisEmail" class="input"
+                               placeholder="E-posta adresin" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="girisSifre">Şifre</label>
+                        <input type="password" id="girisSifre" class="input"
+                               placeholder="Şifren" autocomplete="current-password">
+                    </div>
+
+                    <div class="auth-buttons">
+                        <button type="submit" class="main-button" id="loginButton">
+                            <svg class="ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l4 4-4 4M14 12H4"/>
+                            </svg>
+                            Giriş Yap
+                        </button>
+                    </div>
+
+                    <div id="girisMesaj" class="form-message" role="status"></div>
+
+                </form>
+
+            </section>
 
 
-        <form
-            id="authForm"
-            novalidate
-        >
+            <!-- ================= KAYIT ================= -->
+            <section class="auth-panel" id="panelKayit" role="tabpanel" aria-labelledby="tabKayit" hidden>
 
-            <div class="form-group">
+                <h2>Kayıt Ol</h2>
 
-                <label
-                    class="form-label"
-                    for="emailInput"
-                >
-                    E-posta
-                </label>
+                <form id="kayitForm" novalidate>
 
-                <input
-                    type="email"
-                    id="emailInput"
-                    class="input"
-                    placeholder="E-posta adresin"
-                    autocomplete="email"
-                >
+                    <div class="form-group">
+                        <label class="form-label" for="kayitEmail">E-posta</label>
+                        <input type="email" id="kayitEmail" class="input"
+                               placeholder="E-posta adresin" autocomplete="email">
+                    </div>
 
-            </div>
+                    <div class="form-group">
+                        <label class="form-label" for="kayitUsername">Kullanıcı adı</label>
+                        <input type="text" id="kayitUsername" class="input"
+                               placeholder="ör. ahmet_12" maxlength="20"
+                               autocomplete="username" autocapitalize="none" spellcheck="false">
+                        <div class="small-note">
+                            3-20 karakter: harf, rakam ve alt çizgi. Sohbette ve içeriklerinde bu ad görünür.
+                        </div>
+                    </div>
 
+                    <div class="form-group">
+                        <label class="form-label" for="kayitSifre">Şifre</label>
+                        <input type="password" id="kayitSifre" class="input"
+                               placeholder="En az 6 karakter" autocomplete="new-password">
+                    </div>
 
-            <div class="form-group">
+                    <div class="form-group onay-satir">
 
-                <label
-                    class="form-label"
-                    for="passwordInput"
-                >
-                    Şifre
-                </label>
+                        <div class="onay-linkler">
+                            <a href="kullanici_sozlesmesi.pdf" target="_blank" rel="noopener">
+                                <svg class="ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"/>
+                                </svg>
+                                Kullanıcı Sözleşmesi
+                            </a>
+                            <a href="kvkk_aydinlatma.pdf" target="_blank" rel="noopener">
+                                <svg class="ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6zM9 12l2 2 4-4"/>
+                                </svg>
+                                KVKK Aydınlatma Metni
+                            </a>
+                        </div>
 
-                <input
-                    type="password"
-                    id="passwordInput"
-                    class="input"
-                    placeholder="Şifren"
-                    autocomplete="current-password"
-                >
+                        <button type="button" class="onay-buton" id="onayButon" aria-pressed="false">
+                            <span class="onay-kutu" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12l5 5 9-10"/>
+                                </svg>
+                            </span>
+                            <span>Kullanıcı sözleşmesini ve KVKK aydınlatma metnini okudum ve anladım</span>
+                        </button>
 
-            </div>
+                    </div>
 
+                    <div class="auth-buttons">
+                        <button type="submit" class="main-button" id="registerButton">
+                            <svg class="ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM4 20c0-3.5 3.6-6 8-6M18 14v6M15 17h6"/>
+                            </svg>
+                            Kayıt Ol
+                        </button>
+                    </div>
 
-            <div class="auth-buttons">
+                    <div id="kayitMesaj" class="form-message" role="status"></div>
 
-                <button
-                    type="submit"
-                    class="main-button"
-                    id="loginButton"
-                >
-                    Giriş Yap
-                </button>
+                </form>
 
-                <button
-                    type="button"
-                    class="secondary-button"
-                    id="registerButton"
-                >
-                    Kayıt Ol
-                </button>
+            </section>
 
-            </div>
-
-
-            <div
-                id="authMessage"
-                class="form-message"
-                role="status"
-            ></div>
-
-        </form>
+        </div>
 
     </div>
 
 
     <p class="back-link">
-        <a href="index.html">&larr; Ana sayfaya dön</a>
+        <a href="index.html">
+            <svg class="ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+            Ana sayfaya dön</a>
     </p>
 
 </div>
@@ -300,8 +488,7 @@ button:disabled {
 
 /* =========================================================
    SUPABASE AYARLARI
-   (index.html ile aynı; URL yalnızca proje adresidir, API yolu içermez.
-    Yalnızca publishable key kullanılır, secret key konmaz.)
+   Yalnızca publishable key kullanılır, secret key konmaz.
 ========================================================= */
 
 const SUPABASE_URL =
@@ -316,30 +503,70 @@ const ANA_SAYFA =
 
 
 /* =========================================================
+   ŞİFRE HASH'LEME (64 tur SHA-256)
+   Ham şifre tarayıcıdan çıkmaz. Supabase Auth'a, şifreden
+   türetilen 64 karakterlik hash gönderilir; Supabase bunu
+   ayrıca bcrypt ile saklar (auth.users).
+   DİKKAT: Sabit değerler sonradan değişirse tüm hesapların
+   girişi bozulur. Değiştirme.
+========================================================= */
+
+const HASH_TUR = 64;
+const HASH_TUZ = "okul-ustasi-v1";
+
+async function sha256Hex(metin) {
+
+    const bayt = new TextEncoder().encode(metin);
+    const ozet = await crypto.subtle.digest("SHA-256", bayt);
+
+    return Array.from(new Uint8Array(ozet))
+        .map(function (b) { return b.toString(16).padStart(2, "0"); })
+        .join("");
+}
+
+async function sifreHashle(sifre) {
+
+    if (!window.crypto || !crypto.subtle) {
+        throw new Error("HASH_YOK");
+    }
+
+    let h = HASH_TUZ + ":" + sifre;
+
+    for (let i = 0; i < HASH_TUR; i++) {
+        h = await sha256Hex(h + ":" + HASH_TUZ);
+    }
+
+    return h;
+}
+
+
+/* =========================================================
    ELEMENTLER
 ========================================================= */
 
-const checkingText =
-    document.getElementById("checkingText");
+const $ = function (id) { return document.getElementById(id); };
 
-const authForm =
-    document.getElementById("authForm");
+const checkingText = $("checkingText");
+const authContent = $("authContent");
 
-const emailInput =
-    document.getElementById("emailInput");
+const tabGiris = $("tabGiris");
+const tabKayit = $("tabKayit");
+const panelGiris = $("panelGiris");
+const panelKayit = $("panelKayit");
 
-const passwordInput =
-    document.getElementById("passwordInput");
+const girisForm = $("girisForm");
+const girisEmail = $("girisEmail");
+const girisSifre = $("girisSifre");
+const girisMesaj = $("girisMesaj");
+const loginButton = $("loginButton");
 
-const loginButton =
-    document.getElementById("loginButton");
-
-const registerButton =
-    document.getElementById("registerButton");
-
-const authMessage =
-    document.getElementById("authMessage");
-
+const kayitForm = $("kayitForm");
+const kayitEmail = $("kayitEmail");
+const kayitUsername = $("kayitUsername");
+const kayitSifre = $("kayitSifre");
+const kayitMesaj = $("kayitMesaj");
+const registerButton = $("registerButton");
+const onayButon = $("onayButon");
 
 let supabaseClient = null;
 
@@ -351,20 +578,17 @@ let supabaseClient = null;
 function mesgulYap(durum) {
 
     loginButton.disabled = durum;
-
     registerButton.disabled = durum;
-
 }
-
 
 function hataMetni(error) {
 
     const mesaj =
-        (error && error.message
-            ? error.message
-            : ""
-        ).toLowerCase();
+        (error && error.message ? error.message : "").toLowerCase();
 
+    if (mesaj === "hash_yok") {
+        return "Güvenli bağlantı (HTTPS) gerekli. Siteyi https:// adresinden aç.";
+    }
 
     if (mesaj.includes("invalid login credentials")) {
         return "E-posta veya şifre hatalı.";
@@ -374,15 +598,12 @@ function hataMetni(error) {
         return "E-posta adresin henüz doğrulanmamış. Gelen kutunu kontrol et.";
     }
 
-    if (
-        mesaj.includes("rate limit") ||
-        mesaj.includes("too many")
-    ) {
+    if (mesaj.includes("rate limit") || mesaj.includes("too many")) {
         return "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.";
     }
 
-    if (mesaj.includes("at least 6")) {
-        return "Şifre en az 6 karakter olmalı.";
+    if (mesaj.includes("database error saving new user")) {
+        return "Kullanıcı adı geçersiz veya zaten alınmış. Başka bir ad dene.";
     }
 
     return error && error.message
@@ -390,14 +611,26 @@ function hataMetni(error) {
         : "Bilinmeyen bir hata oluştu.";
 }
 
-
 function anaSayfayaGit() {
 
     /* replace: geri tuşuyla giriş sayfasına dönülmesin */
-
     window.location.replace(ANA_SAYFA);
-
 }
+
+
+/* =========================================================
+   OKUDUM VE ANLADIM DÜĞMESİ
+========================================================= */
+
+function onayDurumu() {
+    return onayButon.getAttribute("aria-pressed") === "true";
+}
+
+onayButon.addEventListener("click", function () {
+
+    onayButon.setAttribute("aria-pressed", onayDurumu() ? "false" : "true");
+    onayButon.classList.remove("uyar");
+});
 
 
 /* =========================================================
@@ -406,79 +639,76 @@ function anaSayfayaGit() {
 
 async function girisYap(olay) {
 
-    if (olay) {
-        olay.preventDefault();
-    }
+    olay.preventDefault();
 
+    const email = girisEmail.value.trim();
+    const sifre = girisSifre.value;
 
-    const email =
-        emailInput.value.trim();
+    girisMesaj.textContent = "";
 
-    const password =
-        passwordInput.value;
-
-
-    authMessage.textContent = "";
-
-
-    if (!email || !password) {
-
-        authMessage.textContent =
-            "E-posta ve şifre gir.";
-
+    if (!email || !sifre) {
+        girisMesaj.textContent = "E-posta ve şifre gir.";
         return;
     }
 
-
     mesgulYap(true);
-
-    authMessage.textContent =
-        "Giriş yapılıyor...";
-
+    girisMesaj.textContent = "Giriş yapılıyor...";
 
     try {
 
-        const {
-            error
-        } = await supabaseClient
-            .auth
-            .signInWithPassword({
+        const hash = await sifreHashle(sifre);
 
+        let { error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: hash
+        });
+
+        /* Eski hesaplar: şifre henüz hash'siz kayıtlıysa bir kez ham
+           şifreyle dene, başarılıysa hesabı otomatik hash'e taşı. */
+        if (error && /invalid login credentials/i.test(error.message || "")) {
+
+            const eski = await supabaseClient.auth.signInWithPassword({
                 email: email,
-
-                password: password
-
+                password: sifre
             });
 
+            if (!eski.error) {
+
+                const guncel = await supabaseClient.auth.updateUser({
+                    password: hash
+                });
+
+                if (guncel.error) {
+                    console.error(guncel.error);
+                }
+
+                error = null;
+
+            } else {
+                error = eski.error;
+            }
+        }
 
         if (error) {
-
-            authMessage.textContent =
-                "Giriş başarısız: " +
-                hataMetni(error);
-
+            girisMesaj.textContent = "Giriş başarısız: " + hataMetni(error);
             mesgulYap(false);
-
             return;
         }
 
-
-        authMessage.textContent =
-            "Giriş başarılı. Yönlendiriliyorsun...";
-
+        girisMesaj.textContent = "Giriş başarılı. Yönlendiriliyorsun...";
         anaSayfayaGit();
 
     } catch (e) {
 
         console.error(e);
 
-        authMessage.textContent =
-            "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
+        girisMesaj.textContent =
+            e && e.message === "HASH_YOK"
+                ? hataMetni(e)
+                : "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
 
         mesgulYap(false);
-
     }
-
 }
 
 
@@ -486,123 +716,149 @@ async function girisYap(olay) {
    KAYIT OL
 ========================================================= */
 
-async function kayitOl() {
+async function kayitOl(olay) {
 
-    const email =
-        emailInput.value.trim();
+    olay.preventDefault();
 
-    const password =
-        passwordInput.value;
+    const email = kayitEmail.value.trim();
+    const sifre = kayitSifre.value;
 
+    kayitMesaj.textContent = "";
 
-    authMessage.textContent = "";
-
-
-    if (!email || !password) {
-
-        authMessage.textContent =
-            "E-posta ve şifre gir.";
-
+    if (!email || !sifre) {
+        kayitMesaj.textContent = "E-posta ve şifre gir.";
         return;
     }
 
-
-    if (password.length < 6) {
-
-        authMessage.textContent =
-            "Şifre en az 6 karakter olmalı.";
-
+    if (sifre.length < 6) {
+        kayitMesaj.textContent = "Şifre en az 6 karakter olmalı.";
         return;
     }
 
+    /* Kullanıcı adı: yalnızca arayüz kontrolü. Asıl kural ve
+       benzersizlik veritabanında (profiles tablosu) zorunlu tutulur. */
+
+    const username = kayitUsername.value.trim().toLowerCase();
+
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        kayitMesaj.textContent = "Kullanıcı adı 3-20 karakter olmalı (a-z, 0-9, _).";
+        return;
+    }
+
+    if (!onayDurumu()) {
+        kayitMesaj.textContent =
+            "Kayıt olmak için sözleşme ve KVKK metnini okuyup \"okudum ve anladım\" düğmesine basmalısın.";
+        onayButon.classList.add("uyar");
+        onayButon.focus();
+        return;
+    }
 
     mesgulYap(true);
-
-    authMessage.textContent =
-        "Kayıt oluşturuluyor...";
-
+    kayitMesaj.textContent = "Kayıt oluşturuluyor...";
 
     try {
 
-        const {
-            data,
-            error
-        } = await supabaseClient
-            .auth
-            .signUp({
+        const { data: musait, error: musaitHata } =
+            await supabaseClient.rpc("username_musait", { p_username: username });
 
-                email: email,
-
-                password: password
-
-            });
-
-
-        if (error) {
-
-            authMessage.textContent =
-                "Kayıt başarısız: " +
-                hataMetni(error);
-
+        if (musaitHata) {
+            kayitMesaj.textContent =
+                "Kullanıcı adı kontrol edilemedi: " + hataMetni(musaitHata);
             mesgulYap(false);
-
             return;
         }
 
+        if (musait !== true) {
+            kayitMesaj.textContent =
+                "Bu kullanıcı adı alınmış veya geçersiz. Başka bir ad dene.";
+            mesgulYap(false);
+            return;
+        }
 
-        /*
-         * Supabase, mevcut bir e-posta ile tekrar
-         * kayıt denenmesi durumunda bazı durumlarda
-         * error döndürmez.
-         *
-         * Böyle bir durumda identities boş olur.
-         */
+        const hash = await sifreHashle(sifre);
 
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: hash,
+            options: {
+                data: {
+                    username: username,
+                    sozlesme_kabul: true,
+                    kvkk_okudum: true,
+                    onay_zamani: new Date().toISOString()
+                }
+            }
+        });
+
+        if (error) {
+            kayitMesaj.textContent = "Kayıt başarısız: " + hataMetni(error);
+            mesgulYap(false);
+            return;
+        }
+
+        /* Mevcut e-posta ile tekrar kayıt denenirse bazı durumlarda
+           error dönmez; identities boş olur. */
         if (
             data.user &&
             Array.isArray(data.user.identities) &&
             data.user.identities.length === 0
         ) {
-
-            authMessage.textContent =
+            kayitMesaj.textContent =
                 "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı dene.";
-
             mesgulYap(false);
-
             return;
         }
-
 
         if (!data.session) {
-
             /* E-posta doğrulaması açıksa oturum hemen başlamaz */
-
-            authMessage.textContent =
+            kayitMesaj.textContent =
                 "Kayıt oluşturuldu. E-posta adresini doğruladıktan sonra giriş yap.";
-
             mesgulYap(false);
-
             return;
         }
 
-
-        authMessage.textContent =
-            "Kayıt başarılı. Yönlendiriliyorsun...";
-
+        kayitMesaj.textContent = "Kayıt başarılı. Yönlendiriliyorsun...";
         anaSayfayaGit();
 
     } catch (e) {
 
         console.error(e);
 
-        authMessage.textContent =
-            "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
+        kayitMesaj.textContent =
+            e && e.message === "HASH_YOK"
+                ? hataMetni(e)
+                : "Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.";
 
         mesgulYap(false);
-
     }
-
 }
+
+
+/* =========================================================
+   GİRİŞ / KAYIT SEKMELERİ (iki ayrı form)
+========================================================= */
+
+function modAyarla(kayit) {
+
+    tabGiris.setAttribute("aria-selected", kayit ? "false" : "true");
+    tabKayit.setAttribute("aria-selected", kayit ? "true" : "false");
+
+    panelGiris.hidden = kayit;
+    panelKayit.hidden = !kayit;
+
+    girisMesaj.textContent = "";
+    kayitMesaj.textContent = "";
+
+    try {
+        history.replaceState(null, "", kayit ? "#kayit" : location.pathname + location.search);
+    } catch (e) {}
+}
+
+tabGiris.addEventListener("click", function () { modAyarla(false); });
+tabKayit.addEventListener("click", function () { modAyarla(true); });
+
+girisForm.addEventListener("submit", girisYap);
+kayitForm.addEventListener("submit", kayitOl);
 
 
 /* =========================================================
@@ -613,72 +869,42 @@ async function kayitOl() {
 async function baslat() {
 
     if (!window.supabase) {
-
         checkingText.textContent =
             "Giriş sistemi yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.";
-
         return;
     }
 
-
     supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY
-        );
-
+        window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
     try {
 
-        const {
-            data: {
-                session
-            }
-        } = await supabaseClient
-            .auth
-            .getSession();
-
+        const { data: { session } } = await supabaseClient.auth.getSession();
 
         if (session) {
-
             checkingText.textContent =
                 "Zaten giriş yapmışsın. Ana sayfaya yönlendiriliyorsun...";
-
             anaSayfayaGit();
-
             return;
         }
 
     } catch (e) {
-
         console.error(e);
-
     }
 
-
-    checkingText.style.display =
-        "none";
-
-    authForm.style.display =
-        "block";
-
+    checkingText.style.display = "none";
+    authContent.style.display = "block";
 }
 
 
-authForm.addEventListener(
-    "submit",
-    girisYap
-);
-
-registerButton.addEventListener(
-    "click",
-    kayitOl
-);
-
+modAyarla(location.hash.toLowerCase() === "#kayit");
 
 baslat();
 
 </script>
+
+
+<script src="ortak.js"></script>
 
 </body>
 </html>

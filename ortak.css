@@ -329,8 +329,22 @@ html[data-tema="dark"] .ou-panel {
 }
 
 .ou-menu .ou-m-ikon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 26px;
-    text-align: center;
+}
+
+.ou-svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+}
+
+.ou-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ou-panel-hesap {

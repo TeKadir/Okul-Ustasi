@@ -24,17 +24,56 @@
     ----------------------------------------------------- */
 
     var BAGLANTILAR = [
-        { ad: "Anasayfa",      dosya: "anasayfa.html",     ikon: "" },
-        { ad: "Ders Yardımı",  dosya: "ders-yardimi.html", ikon: "" },
-        { ad: "Ödev",          dosya: "odev-soru.html",    ikon: "" },
-        { ad: "Soru ve Konu",  dosya: "soru-olustur.html", ikon: "" },
-        { ad: "Konular",       dosya: "konular.html",      ikon: "" },
-        { ad: "Duyurular",     dosya: "duyurular.html",    ikon: "" },
-        { ad: "Bildirimler",   dosya: "bildirimler.html",  ikon: "" },
-        { ad: "Olaylar",       dosya: "olaylar.html",      ikon: "" },
-        { ad: "Takvim",        dosya: "takvim.html",       ikon: "" },
-        { ad: "Sohbet",        dosya: "sohbet.html",       ikon: "" }
+        { ad: "Anasayfa",      dosya: "anasayfa.html",     ikon: "ev" },
+        { ad: "Ders Yardımı",  dosya: "ders-yardimi.html", ikon: "kitap" },
+        { ad: "Ödev",          dosya: "odev-soru.html",    ikon: "kalem" },
+        { ad: "Soru ve Konu",  dosya: "soru-olustur.html", ikon: "soru" },
+        { ad: "Konular",       dosya: "konular.html",      ikon: "liste" },
+        { ad: "Duyurular",     dosya: "duyurular.html",    ikon: "duyuru" },
+        { ad: "Bildirimler",   dosya: "bildirimler.html",  ikon: "zil" },
+        { ad: "Olaylar",       dosya: "olaylar.html",      ikon: "bayrak" },
+        { ad: "Takvim",        dosya: "takvim.html",       ikon: "takvim" },
+        { ad: "Sohbet",        dosya: "sohbet.html",       ikon: "sohbet" }
     ];
+
+
+    /* -----------------------------------------------------
+       SVG İKONLAR (emoji yok; rengi yazı rengini izler)
+       Sabit, güvenilir metinlerdir; kullanıcı verisi içermez.
+    ----------------------------------------------------- */
+
+    var IKONLAR = {
+        ev:      '<path d="M4 11l8-7 8 7M6 10v10h12V10M10 20v-6h4v6"/>',
+        kitap:   '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M9 7h6"/>',
+        kalem:   '<path d="M4 20l4-1 11-11-3-3L5 16l-1 4zM14 6l3 3"/>',
+        soru:    '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3 1.2 4.3L3 21l4.7-1.2A9 9 0 0 0 12 21zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 16.5v.5"/>',
+        liste:   '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+        duyuru:  '<path d="M4 10v4h3l7 4V6l-7 4zM17 9a4 4 0 0 1 0 6"/>',
+        zil:     '<path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/>',
+        bayrak:  '<path d="M5 21V4M5 5h12l-2 4 2 4H5"/>',
+        takvim:  '<path d="M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 3v4M16 3v4"/>',
+        sohbet:  '<path d="M4 5h16v11H9l-5 4zM8 9h8M8 12h5"/>',
+        ay:      '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+        gunes:   '<path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
+    };
+
+
+    function svgIkon(ad) {
+
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("stroke", "currentColor");
+        svg.setAttribute("stroke-width", "2");
+        svg.setAttribute("stroke-linecap", "round");
+        svg.setAttribute("stroke-linejoin", "round");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("class", "ou-svg");
+        svg.innerHTML = IKONLAR[ad] || "";
+
+        return svg;
+    }
 
 
     function eleman(tag, sinif, metin) {
@@ -92,7 +131,8 @@
 
         var koyu = kok.getAttribute("data-tema") === "dark";
 
-        temaDugmesi.textContent = koyu ? "" : "";
+        temaDugmesi.textContent = "";
+        temaDugmesi.appendChild(svgIkon(koyu ? "gunes" : "ay"));
 
         temaDugmesi.setAttribute(
             "aria-label",
@@ -243,7 +283,9 @@
             var a = eleman("a");
             a.href = b.dosya;
 
-            a.appendChild(eleman("span", "ou-m-ikon", b.ikon));
+            var ikonKap = eleman("span", "ou-m-ikon");
+            ikonKap.appendChild(svgIkon(b.ikon));
+            a.appendChild(ikonKap);
             a.appendChild(eleman("span", null, b.ad));
 
             if (b.dosya === simdi) {
