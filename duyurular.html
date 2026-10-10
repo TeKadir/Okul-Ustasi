@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
+
+<title>Duyurular - Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="duyurular.css">
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+</head>
+
+<body>
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç"></button>
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>
+            Duyurular
+        </h1>
+
+        <p>
+            Okul ile ilgili önemli etkinlikler ve duyurular burada yayınlanır.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         DUYURU LİSTESİ
+    ====================================================== -->
+
+    <div id="duyuruListesi">
+        Duyurular yükleniyor...
+    </div>
+
+
+    <!-- =====================================================
+         ADMIN PANELİ
+    ====================================================== -->
+
+    <div
+        class="card"
+        id="adminPanel"
+    >
+
+        <h2>
+            Yönetici Paneli
+        </h2>
+
+
+        <div id="adminLoginBox">
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="adminEmail"
+                >
+                    Yönetici e-postası
+                </label>
+
+                <input
+                    type="email"
+                    id="adminEmail"
+                    class="input"
+                    autocomplete="username"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="adminPassword"
+                >
+                    Yönetici şifresi
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    class="input"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <button
+                class="main-button"
+                id="adminLoginButton"
+            >
+                Yönetici Girişi
+            </button>
+
+
+            <div
+                id="adminMessage"
+                class="form-message"
+            ></div>
+
+        </div>
+
+
+        <div id="adminControls">
+
+            <div class="admin-section">
+
+                <h2 id="duyuruFormTitle">
+                    Yeni Duyuru Ekle
+                </h2>
+
+
+                <div class="event-form-box">
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="duyuruBaslikInput"
+                        >
+                            Duyuru başlığı
+                        </label>
+
+                        <input
+                            type="text"
+                            id="duyuruBaslikInput"
+                            class="input"
+                            maxlength="200"
+                            placeholder="Duyuru başlığı"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="duyuruTarihInput"
+                        >
+                            Duyuru tarihi
+                        </label>
+
+                        <input
+                            type="date"
+                            id="duyuruTarihInput"
+                            class="input"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="duyuruAciklamaInput"
+                        >
+                            Duyuru açıklaması
+                        </label>
+
+                        <textarea
+                            id="duyuruAciklamaInput"
+                            class="input"
+                            maxlength="5000"
+                            placeholder="Duyuru açıklaması"
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        class="main-button"
+                        id="saveDuyuruButton"
+                    >
+                        Duyuruyu Kaydet
+                    </button>
+
+
+                    <button
+                        class="secondary-button"
+                        id="cancelDuyuruButton"
+                        style="display:none;"
+                    >
+                        Düzenlemeyi İptal Et
+                    </button>
+
+
+                    <div
+                        id="duyuruMessage"
+                        class="form-message"
+                    ></div>
+
+                </div>
+
+
+                <h3>
+                    Kayıtlı Duyurular
+                </h3>
+
+
+                <div id="adminDuyuruList">
+                    Duyurular yükleniyor...
+                </div>
+
+            </div>
+
+
+            <button
+                class="secondary-button"
+                id="adminLogoutButton"
+            >
+                Yönetici Çıkışı
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+        Okul Ustası
+    </footer>
+
+</div>
+
+
+<script src="duyurular.js"></script>
+
+
+<script src="sifre.js"></script>
+<script src="ortak.js"></script>
+
+</body>
+</html>

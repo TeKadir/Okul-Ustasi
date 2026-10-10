@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
+
+<title>Neler Oldu? - Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="olaylar.css">
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç"></button>
+    </div>
+
+</header>
+
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     BAŞLIK
+===================================================== -->
+
+<div class="card events-intro">
+
+    <h1>
+        Neler Oldu?
+    </h1>
+
+
+    <p>
+        Okul içinde daha önce kaydedilmiş
+        olayları burada görebilirsin.
+    </p>
+
+</div>
+
+
+
+<!-- =====================================================
+     SON OLAY
+===================================================== -->
+
+<div
+    class="card"
+    id="latestEventCard"
+>
+
+    <h2 id="latestEventTitle">
+        Olaylar yükleniyor...
+    </h2>
+
+
+    <div
+        class="event-date"
+        id="latestEventDate"
+    >
+    </div>
+
+
+    <div
+        id="latestEventDescription"
+    >
+
+        <p>
+            Olay bilgileri yükleniyor...
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TÜM OLAYLAR
+===================================================== -->
+
+<div class="card">
+
+    <h2>
+        Tüm Olaylar
+    </h2>
+
+
+    <p class="small-note">
+        Kayıtlı olaylar tarih sırasına göre
+        gösterilir.
+    </p>
+
+
+    <div
+        id="allEventsList"
+    >
+        Olaylar yükleniyor...
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ADMIN PANELİ
+===================================================== -->
+
+<div
+    class="card"
+    id="adminPanel"
+>
+
+    <h2>
+        Yönetici Paneli
+    </h2>
+
+
+    <!-- ADMIN LOGIN -->
+
+    <div
+        id="adminLoginBox"
+    >
+
+        <div class="form-group">
+
+            <label
+                class="form-label"
+                for="adminEmail"
+            >
+                Yönetici e-postası
+            </label>
+
+
+            <input
+                type="email"
+                id="adminEmail"
+                class="input"
+                autocomplete="username"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label
+                class="form-label"
+                for="adminPassword"
+            >
+                Yönetici şifresi
+            </label>
+
+
+            <input
+                type="password"
+                id="adminPassword"
+                class="input"
+                autocomplete="current-password"
+            >
+
+        </div>
+
+
+        <button
+            class="main-button"
+            id="adminLoginButton"
+        >
+            Yönetici Girişi
+        </button>
+
+
+        <div
+            id="adminMessage"
+            class="form-message"
+        ></div>
+
+    </div>
+
+
+
+    <!-- ADMIN KONTROLLER -->
+
+    <div
+        id="adminControls"
+    >
+
+
+        <div class="admin-section">
+
+            <h2>
+                Olay Yönetimi
+            </h2>
+
+
+            <p class="small-note">
+
+                Buradan yeni olay ekleyebilir,
+                mevcut olayları düzenleyebilir
+                veya silebilirsin.
+
+            </p>
+
+
+            <div
+                class="event-form-box"
+            >
+
+                <h3 id="eventFormTitle">
+                    Yeni Olay Ekle
+                </h3>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventTitleInput"
+                    >
+                        Olay başlığı
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="eventTitleInput"
+                        class="input"
+                        maxlength="150"
+                        placeholder="Olay başlığı"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventDateInput"
+                    >
+                        Olay tarihi
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="eventDateInput"
+                        class="input"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="eventDescriptionInput"
+                    >
+                        Olay açıklaması
+                    </label>
+
+
+                    <textarea
+                        id="eventDescriptionInput"
+                        class="input"
+                        maxlength="5000"
+                        placeholder="Olayı tarafsız şekilde açıklayın."
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    class="main-button"
+                    id="saveEventButton"
+                >
+                    Olayı Kaydet
+                </button>
+
+
+                <button
+                    class="secondary-button"
+                    id="cancelEventButton"
+                    style="display:none;"
+                >
+                    Düzenlemeyi İptal Et
+                </button>
+
+
+                <div
+                    id="eventMessage"
+                    class="form-message"
+                ></div>
+
+            </div>
+
+
+            <h3>
+                Kayıtlı Olaylar
+            </h3>
+
+
+            <div
+                id="adminEventList"
+            >
+                Olaylar yükleniyor...
+            </div>
+
+        </div>
+
+
+        <button
+            class="secondary-button"
+            id="adminLogoutButton"
+        >
+            Yönetici Çıkışı
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<footer>
+
+    Okul Ustası
+
+</footer>
+
+
+</div>
+
+
+<script src="olaylar.js"></script>
+
+
+
+<script src="sifre.js"></script>
+<script src="ortak.js"></script>
+
+</body>
+</html>

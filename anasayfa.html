@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
+
+<title>Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="anasayfa.css">
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+<link rel="stylesheet" href="yeni.css">
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail" hidden></span>
+            <a class="ou-profil" id="topProfilLink" href="profil.html">Profilim</a>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç">🌙</button>
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     KARŞILAMA
+===================================================== -->
+
+<section
+    class="welcome"
+    id="welcome"
+>
+
+    <div class="welcome-inner">
+
+        <div class="welcome-kicker">
+            Hoş geldin
+        </div>
+
+
+        <div
+            class="welcome-stage"
+            id="welcomeStage"
+        >
+
+            <div
+                class="welcome-text"
+                id="welcomeText"
+            >
+                <span
+                    class="welcome-text-inner"
+                    id="welcomeTextInner"
+                ></span>
+            </div>
+
+
+            <div
+                class="welcome-links"
+                id="welcomeLinks"
+            >
+            </div>
+
+        </div>
+
+
+        <div
+            class="welcome-dots"
+            id="welcomeDots"
+        >
+        </div>
+
+
+        <button
+            class="welcome-pause"
+            id="welcomePause"
+        >
+            Duraklat
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<div class="container">
+
+
+    <h1>
+        Okul Ustası
+    </h1>
+
+
+    <!-- =================================================
+         TANITIM
+    ================================================= -->
+
+    <div class="card intro-card">
+
+        <p>
+
+            Öğrencilerin kendi aralarında
+            <span class="highlight">
+                çalışabileceği,
+                öğrenebileceği ve iletişim kurabileceği
+            </span>
+            bir okul platformu.
+
+        </p>
+
+
+        <p class="disclaimer">
+
+            Bu platform öğrencilerin soru sorması,
+            bilgi paylaşması ve okul ile ilgili
+            içeriklere ulaşabilmesi için hazırlanmıştır.
+
+            Kullanıcıların
+            <span class="highlight">
+                saygılı ve sorumlu
+            </span>
+            davranması beklenir.
+
+        </p>
+
+    </div>
+
+
+    <!-- Kisayollar, hizli erisim, ornek icerikler, takvim/sohbet ozeti (anasayfa-ek.js) -->
+    <div id="ynAnasayfaEk"></div>
+
+
+</div>
+
+
+
+<script src="anasayfa.js"></script>
+
+
+
+<script src="anasayfa-ek.js"></script>
+<script src="ortak.js"></script>
+
+</body>
+</html>

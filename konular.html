@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
+
+    <title>Konular - Okul Ustası</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="konular.css">
+
+<!-- Ortak tema + panel (ortak.css / ortak.js) -->
+<script>
+/* Tema tercihi sayfa çizilmeden ÖNCE uygulanır (beyaz parlama olmaz). */
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+</head>
+
+<body class="ou-hatli">
+
+<!-- =====================================================
+     ÜST MENÜ (tüm sayfalarda aynı)
+===================================================== -->
+<header class="ou-ust">
+
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+
+        <button type="button" class="ou-tema" id="ouTemaDugme"
+                aria-label="Karanlık temaya geç"></button>
+    </div>
+
+</header>
+
+<main class="sayfa">
+
+    <section class="baslik-alani">
+
+        <h1>Konular</h1>
+
+        <p>
+            Önce dersini seç, sonra konu anlatım videolarını izle.
+        </p>
+
+    </section>
+
+
+    <!-- TESTLER: ayrı bölüm (test.html) -->
+    <section class="form-karti test-karti">
+        <h2>Test çöz</h2>
+        <p>Konuyu pekiştirmek için testlere git: seviyeni ve dersini seçip soruları çöz.</p>
+        <a id="testLinki" class="gonder-buton test-link" href="test.html">Testlere git</a>
+    </section>
+
+
+    <!-- ADMİN: video ekleme / düzenleme (yetki Supabase tarafında da kontrol edilir) -->
+    <section
+        id="adminKutu"
+        class="form-karti admin-kutu"
+        style="display:none;">
+
+        <h2 id="adminBaslik">Yeni konu videosu ekle</h2>
+
+        <form id="videoFormu">
+
+            <div class="form-grid">
+
+                <div class="alan">
+                    <label for="vDers">Ders</label>
+                    <select id="vDers" required>
+                        <option value="">Ders seç</option>
+                    </select>
+                </div>
+
+                <div class="alan">
+                    <label for="vBaslik">Video başlığı</label>
+                    <input
+                        id="vBaslik"
+                        type="text"
+                        maxlength="150"
+                        placeholder="Örn: Üslü sayılar - 1"
+                        required>
+                </div>
+
+                <div class="alan">
+                    <label for="vKonu">Konu adı (isteğe bağlı)</label>
+                    <input
+                        id="vKonu"
+                        type="text"
+                        maxlength="150"
+                        placeholder="Örn: Üslü İfadeler">
+                </div>
+
+                <div class="alan">
+                    <label for="vUrl">YouTube bağlantısı</label>
+                    <input
+                        id="vUrl"
+                        type="url"
+                        inputmode="url"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        required>
+                </div>
+
+                <div class="alan tam-alan">
+                    <label for="vAciklama">Açıklama (isteğe bağlı)</label>
+                    <textarea
+                        id="vAciklama"
+                        maxlength="1000"
+                        placeholder="Videoda neler anlatılıyor?"></textarea>
+                </div>
+
+            </div>
+
+            <div class="form-alt">
+
+                <button
+                    id="vIptal"
+                    class="kucuk-buton"
+                    type="button"
+                    style="display:none;">
+                    Vazgeç
+                </button>
+
+                <button
+                    id="vKaydet"
+                    class="gonder-buton"
+                    type="submit">
+                    Videoyu Ekle
+                </button>
+
+            </div>
+
+            <div id="vMesaj" class="mesaj"></div>
+
+        </form>
+
+    </section>
+
+
+    <!-- 1) DERS SEÇ -->
+    <section>
+
+        <div class="liste-baslik">
+            <h2>1. Dersini seç</h2>
+        </div>
+
+        <div id="dersIzgara" class="ders-izgara">
+            <div class="yukleniyor">Dersler yükleniyor...</div>
+        </div>
+
+    </section>
+
+
+    <!-- 2) OYNATICI -->
+    <section
+        id="oynaticiAlani"
+        class="oynatici"
+        style="display:none;">
+
+        <div id="videoCerceve" class="video-cerceve"></div>
+
+        <h3 id="oynatBaslik"></h3>
+        <div id="oynatKonu" class="video-konu"></div>
+        <p id="oynatAciklama" class="video-aciklama"></p>
+
+    </section>
+
+
+    <!-- 3) VİDEO LİSTESİ -->
+    <section id="videoBolumu" style="display:none;">
+
+        <div class="liste-baslik">
+            <h2 id="videoBolumBaslik">2. Videoyu seç</h2>
+        </div>
+
+        <div id="videoListesi"></div>
+
+    </section>
+
+</main>
+
+<script src="konular.js"></script>
+
+
+<script src="ortak.js"></script>
+
+</body>
+</html>
