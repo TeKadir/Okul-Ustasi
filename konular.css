@@ -798,4 +798,11 @@
             }
         }
 
-    
+        .test-link {
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .test-karti p {
+            margin: 0 0 12px;
+        }

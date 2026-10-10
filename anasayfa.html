@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
 
 <title>Okul Ustası</title>
 
@@ -45,7 +48,8 @@ try {
         <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
 
         <div id="topUser">
-            <span id="topUserEmail"></span>
+            <span id="topUserEmail" hidden></span>
+            <a class="ou-profil" id="topProfilLink" href="profil.html">Profilim</a>
             <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
         </div>
 

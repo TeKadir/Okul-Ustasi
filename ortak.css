@@ -703,3 +703,16 @@ html[data-tema="dark"] iframe {
 .form-ac-buton[aria-expanded="true"] .kapa-ikon {
     display: inline-block;
 }
+
+
+/* Anasayfa üst menüsünde e-posta yerine "Profilim" bağlantısı
+   (e-posta metni gizli span'de durur; panelin Hesap bölümü onu okur) */
+.ou-ust .ou-profil {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--ou-yazi);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ou-ust .ou-profil:hover { text-decoration: underline; }

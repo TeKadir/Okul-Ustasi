@@ -234,6 +234,11 @@ function dersSec(d) {
     seciliDers = d;
     oynayanId = null;
 
+    /* Seçilen dersin testlerine giden bağlantı */
+    const testLinki = document.getElementById("testLinki");
+    testLinki.href = "test.html?ders=" + encodeURIComponent(d);
+    testLinki.textContent = d + " testlerine git";
+
     history.replaceState(null, "", "#" + encodeURIComponent(d));
 
     oynatıcıyiKapat();

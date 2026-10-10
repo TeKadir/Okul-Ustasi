@@ -199,6 +199,15 @@ const WELCOME_ITEMS = [
 ];
 
 
+/* Windows uygulaması: yalnızca uygulamanın dışında (tarayıcıda) gösterilir. */
+if (!/Electron/i.test(navigator.userAgent)) {
+    WELCOME_ITEMS.push({
+        text: "Okul Ustası'nı Windows uygulaması olarak kullanmak ister misin?",
+        button: "Uygulamayı İndir",
+        href: "uygulama/Okul-Ustasi.exe"
+    });
+}
+
 const WELCOME_INTERVAL =
     5000;
 
