@@ -1,0 +1,384 @@
+const SUPABASE_URL = "https://hinisayolrgyzcoztobi.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_76n3XsryMfvfdYwKeUu6SA_TCxImZiW";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const $ = function (id) { return document.getElementById(id); };
+
+const topLoginLink = $("topLoginLink");
+const topUser = $("topUser");
+const topUserEmail = $("topUserEmail");
+const logoutButton = $("logoutButton");
+
+const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+let kullanici = null;
+let gorunenYil = new Date().getFullYear();
+let gorunenAy = new Date().getMonth();
+let seciliGun = tarihAnahtari(new Date());
+let etkinlikler = [];
+let duzenlenenId = null;
+let yuklemeSayaci = 0;
+let kaydediliyor = false;
+
+
+/* ---------- yardımcılar ---------- */
+
+function iki(n) { return String(n).padStart(2, "0"); }
+
+function tarihAnahtari(d) {
+    return d.getFullYear() + "-" + iki(d.getMonth() + 1) + "-" + iki(d.getDate());
+}
+
+function saatMetni(iso) {
+    const d = new Date(iso);
+    return iki(d.getHours()) + ":" + iki(d.getMinutes());
+}
+
+function yerelIso(tarih, saat) {
+    /* Tarayıcının yerel saatini tam zaman damgasına çevirir. */
+    return new Date(tarih + "T" + saat + ":00").toISOString();
+}
+
+function mesaj(metin, basari) {
+    const el = $("formMesaj");
+    el.textContent = metin || "";
+    el.className = "yn-mesaj" + (metin ? (basari ? " ok" : " hata") : "");
+}
+
+
+/* ---------- üst çubuk (diğer sayfalarla aynı desen) ---------- */
+
+function ustCubuk(session) {
+    if (session && session.user) {
+        topLoginLink.style.display = "none";
+        topUser.style.display = "flex";
+        topUserEmail.textContent = session.user.email || "";
+    } else {
+        topLoginLink.style.display = "inline-block";
+        topUser.style.display = "none";
+        topUserEmail.textContent = "";
+    }
+}
+
+logoutButton.addEventListener("click", async function () {
+    await supabaseClient.auth.signOut();
+});
+
+
+/* ---------- veri ---------- */
+
+async function etkinlikleriYukle() {
+
+    const sira = ++yuklemeSayaci;
+
+    const bas = new Date(gorunenYil, gorunenAy - 1, 20).toISOString();
+    const son = new Date(gorunenYil, gorunenAy + 2, 10).toISOString();
+
+    /* Yetkilendirme RLS ile yapılır; user_id filtresi gerekmez. */
+    const { data, error } = await supabaseClient
+        .from("calendar_events")
+        .select("id, title, description, start_time, end_time")
+        .gte("start_time", bas)
+        .lt("start_time", son)
+        .order("start_time", { ascending: true });
+
+    if (sira !== yuklemeSayaci) {
+        return;
+    }
+
+    if (error) {
+        console.error(error);
+        $("etkinlikListesi").textContent = "Etkinlikler yüklenemedi.";
+        return;
+    }
+
+    etkinlikler = data || [];
+    takvimiCiz();
+    gunuListele();
+}
+
+function gunEtkinlikleri(anahtar) {
+    return etkinlikler.filter(function (e) {
+        return tarihAnahtari(new Date(e.start_time)) === anahtar;
+    });
+}
+
+
+/* ---------- takvim ızgarası ---------- */
+
+function takvimiCiz() {
+
+    $("ayBasligi").textContent = AYLAR[gorunenAy] + " " + gorunenYil;
+
+    const kap = $("gunler");
+    kap.textContent = "";
+
+    const ilk = new Date(gorunenYil, gorunenAy, 1);
+    const kayma = (ilk.getDay() + 6) % 7;
+    const bugun = tarihAnahtari(new Date());
+
+    for (let i = 0; i < 42; i++) {
+
+        const d = new Date(gorunenYil, gorunenAy, 1 - kayma + i);
+        const anahtar = tarihAnahtari(d);
+
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "yn-gun";
+
+        if (d.getMonth() !== gorunenAy) { b.classList.add("disari"); }
+        if (anahtar === bugun) { b.classList.add("bugun"); }
+        if (anahtar === seciliGun) { b.classList.add("secili"); }
+
+        b.appendChild(document.createTextNode(String(d.getDate())));
+
+        const sayi = gunEtkinlikleri(anahtar).length;
+
+        if (sayi > 0) {
+            b.appendChild(document.createElement("br"));
+            const n = document.createElement("span");
+            n.className = "nokta";
+            n.textContent = String(sayi);
+            b.appendChild(n);
+        }
+
+        b.setAttribute("aria-label", d.getDate() + " " + AYLAR[d.getMonth()] + (sayi ? ", " + sayi + " etkinlik" : ""));
+
+        b.addEventListener("click", function () {
+            seciliGun = anahtar;
+
+            if (d.getMonth() !== gorunenAy) {
+                gorunenYil = d.getFullYear();
+                gorunenAy = d.getMonth();
+                etkinlikleriYukle();
+                return;
+            }
+
+            takvimiCiz();
+            gunuListele();
+        });
+
+        kap.appendChild(b);
+    }
+}
+
+function gunuListele() {
+
+    const p = seciliGun.split("-");
+    $("gunBasligi").textContent = Number(p[2]) + " " + AYLAR[Number(p[1]) - 1] + " " + p[0];
+
+    const kap = $("etkinlikListesi");
+    kap.textContent = "";
+
+    const liste = gunEtkinlikleri(seciliGun);
+
+    if (liste.length === 0) {
+        const bos = document.createElement("div");
+        bos.className = "yn-bos";
+        bos.textContent = "Bu gün için etkinlik yok.";
+        kap.appendChild(bos);
+        return;
+    }
+
+    liste.forEach(function (e) {
+
+        const kutu = document.createElement("div");
+        kutu.className = "yn-etkinlik";
+
+        const h = document.createElement("h3");
+        h.textContent = e.title;
+
+        const saat = document.createElement("div");
+        saat.className = "yn-soluk";
+        saat.textContent = saatMetni(e.start_time) + (e.end_time ? " - " + saatMetni(e.end_time) : "");
+
+        kutu.appendChild(h);
+        kutu.appendChild(saat);
+
+        if (e.description) {
+            const a = document.createElement("p");
+            a.textContent = e.description;
+            kutu.appendChild(a);
+        }
+
+        const satir = document.createElement("div");
+        satir.className = "yn-satir";
+
+        const duzenle = document.createElement("button");
+        duzenle.type = "button";
+        duzenle.className = "yn-btn ikincil kucuk";
+        duzenle.textContent = "Düzenle";
+        duzenle.addEventListener("click", function () { formuAc(e); });
+
+        const sil = document.createElement("button");
+        sil.type = "button";
+        sil.className = "yn-btn tehlike kucuk";
+        sil.textContent = "Sil";
+        sil.addEventListener("click", function () { etkinlikSil(e.id, sil); });
+
+        satir.appendChild(duzenle);
+        satir.appendChild(sil);
+        kutu.appendChild(satir);
+
+        kap.appendChild(kutu);
+    });
+}
+
+
+/* ---------- form ---------- */
+
+function formuAc(e) {
+
+    duzenlenenId = e ? e.id : null;
+
+    $("formBaslik").textContent = e ? "Etkinliği düzenle" : "Yeni etkinlik";
+
+    if (e) {
+        $("fBaslik").value = e.title;
+        $("fTarih").value = tarihAnahtari(new Date(e.start_time));
+        $("fBaslangic").value = saatMetni(e.start_time);
+        $("fBitis").value = e.end_time ? saatMetni(e.end_time) : "";
+        $("fAciklama").value = e.description || "";
+    } else {
+        $("fBaslik").value = "";
+        $("fTarih").value = seciliGun;
+        $("fBaslangic").value = "09:00";
+        $("fBitis").value = "";
+        $("fAciklama").value = "";
+    }
+
+    mesaj("");
+    $("formKutusu").style.display = "block";
+    $("fBaslik").focus();
+    $("formKutusu").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function formuKapat() {
+    duzenlenenId = null;
+    $("formKutusu").style.display = "none";
+    mesaj("");
+}
+
+async function etkinlikKaydet() {
+
+    /* Çift tıklama / tekrar çağrı koruması (asıl yetki RLS'te). */
+    if (kaydediliyor) {
+        return;
+    }
+
+    const baslik = $("fBaslik").value.trim();
+    const tarih = $("fTarih").value;
+    const bas = $("fBaslangic").value;
+    const bit = $("fBitis").value;
+    const aciklama = $("fAciklama").value.trim();
+
+    if (!baslik) { mesaj("Başlık gir.", false); return; }
+    if (!tarih) { mesaj("Tarih seç.", false); return; }
+    if (!bas) { mesaj("Başlangıç saati seç.", false); return; }
+    if (bit && bit < bas) { mesaj("Bitiş saati başlangıçtan önce olamaz.", false); return; }
+
+    const kayit = {
+        title: baslik,
+        description: aciklama || null,
+        start_time: yerelIso(tarih, bas),
+        end_time: bit ? yerelIso(tarih, bit) : null
+    };
+
+    kaydediliyor = true;
+    $("kaydetBtn").disabled = true;
+    mesaj("Kaydediliyor...", true);
+
+    let sonuc;
+
+    if (duzenlenenId === null) {
+        /* user_id gönderilmez: sütunun varsayılanı auth.uid(), RLS de doğrular. */
+        sonuc = await supabaseClient.from("calendar_events").insert(kayit);
+    } else {
+        sonuc = await supabaseClient.from("calendar_events").update(kayit).eq("id", duzenlenenId);
+    }
+
+    kaydediliyor = false;
+    $("kaydetBtn").disabled = false;
+
+    if (sonuc.error) {
+        console.error(sonuc.error);
+        mesaj("Kaydedilemedi: " + sonuc.error.message, false);
+        return;
+    }
+
+    seciliGun = tarih;
+    const d = new Date(tarih + "T00:00:00");
+    gorunenYil = d.getFullYear();
+    gorunenAy = d.getMonth();
+
+    formuKapat();
+    await etkinlikleriYukle();
+}
+
+async function etkinlikSil(id, dugme) {
+
+    if (!window.confirm("Bu etkinlik silinsin mi?")) {
+        return;
+    }
+
+    dugme.disabled = true;
+
+    const { error } = await supabaseClient.from("calendar_events").delete().eq("id", id);
+
+    if (error) {
+        console.error(error);
+        window.alert("Etkinlik silinemedi: " + error.message);
+        dugme.disabled = false;
+        return;
+    }
+
+    await etkinlikleriYukle();
+}
+
+
+/* ---------- olaylar ve başlangıç ---------- */
+
+$("oncekiAy").addEventListener("click", function () {
+    gorunenAy--;
+    if (gorunenAy < 0) { gorunenAy = 11; gorunenYil--; }
+    etkinlikleriYukle();
+});
+
+$("sonrakiAy").addEventListener("click", function () {
+    gorunenAy++;
+    if (gorunenAy > 11) { gorunenAy = 0; gorunenYil++; }
+    etkinlikleriYukle();
+});
+
+$("yeniEtkinlikBtn").addEventListener("click", function () { formuAc(null); });
+$("vazgecBtn").addEventListener("click", formuKapat);
+$("kaydetBtn").addEventListener("click", etkinlikKaydet);
+
+
+function oturumDurumu(session) {
+
+    ustCubuk(session);
+
+    const yeni = session && session.user ? session.user.id : null;
+    const eski = kullanici;
+
+    kullanici = yeni;
+
+    $("girisYok").style.display = yeni ? "none" : "block";
+    $("takvimAlani").style.display = yeni ? "block" : "none";
+
+    /* Aynı kullanıcı için TOKEN_REFRESHED vb. olayları yeniden yüklemesin. */
+    if (yeni && yeni !== eski) {
+        takvimiCiz();
+        etkinlikleriYukle();
+    }
+}
+
+supabaseClient.auth.onAuthStateChange(function (olay, session) {
+    oturumDurumu(session);
+});
+
+supabaseClient.auth.getSession().then(function (r) {
+    oturumDurumu(r.data.session);
+});

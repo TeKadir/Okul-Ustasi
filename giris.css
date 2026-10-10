@@ -1,0 +1,288 @@
+/* index.html ile aynı defter görünümü (kısaltılmış) */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf5 0px,
+            #fffdf5 31px,
+            #c9d8e6 32px
+        );
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+    color: #222;
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    left: 45px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e88989;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.container {
+    width: min(560px, calc(100% - 70px));
+    margin: 35px auto;
+    padding: 25px 20px 40px 55px;
+}
+
+h1 {
+    text-align: center;
+    font-size: clamp(25px, 5vw, 38px);
+    margin-bottom: 15px;
+    transform: rotate(-1deg);
+}
+
+h2 {
+    font-size: 25px;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.card {
+    background: rgba(255, 255, 250, 0.75);
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 4px 4px 0 #555;
+}
+
+.main-button {
+    display: inline-block;
+    background: #fff19a;
+    border: 2px solid #222;
+    box-shadow: 3px 3px 0 #555;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 17px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #222;
+    transition: 0.15s;
+}
+
+.main-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #555;
+}
+
+.secondary-button {
+    background: #fff;
+    display: inline-block;
+    border: 2px solid #333;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 4px;
+}
+
+.secondary-button:hover {
+    background: #eee;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.input {
+    width: 100%;
+    padding: 11px;
+    border: 2px solid #333;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.auth-buttons {
+    margin-top: 10px;
+}
+
+.form-message {
+    margin-top: 12px;
+    font-size: 15px;
+    min-height: 22px;
+}
+
+.small-note {
+    font-size: 14px;
+    color: #666;
+}
+
+.back-link {
+    text-align: center;
+    font-size: 16px;
+}
+
+.back-link a {
+    color: #222;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 17px;
+    color: var(--ou-yazi, #222);
+    background: var(--ou-yuzey, #fff);
+    border: 2px solid var(--ou-cizgi, #333);
+    cursor: pointer;
+}
+
+.auth-tab[aria-selected="true"] {
+    background: var(--ou-vurgu, #fff19a);
+    font-weight: bold;
+    box-shadow: 2px 2px 0 var(--ou-golge, #555);
+}
+
+.auth-panel[hidden] {
+    display: none;
+}
+
+.ikon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    vertical-align: -3px;
+}
+
+.main-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Okudum ve anladım düğmesi */
+.onay-satir {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.onay-linkler {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.onay-linkler a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 12px;
+    color: inherit;
+    font-weight: bold;
+}
+
+.onay-buton {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    text-align: left;
+    color: var(--ou-yazi, #222);
+    background: var(--ou-yuzey, #fff);
+    border: 2px solid var(--ou-cizgi, #333);
+    box-shadow: 2px 2px 0 var(--ou-golge, #555);
+    cursor: pointer;
+}
+
+.onay-kutu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    border: 2px solid var(--ou-cizgi, #333);
+    background: var(--ou-yuzey, #fff);
+}
+
+.onay-kutu svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+}
+
+.onay-buton[aria-pressed="true"] {
+    background: var(--ou-vurgu, #fff19a);
+    font-weight: bold;
+}
+
+.onay-buton[aria-pressed="true"] .onay-kutu svg {
+    opacity: 1;
+}
+
+.onay-buton:focus-visible,
+.auth-tab:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.onay-buton.uyar {
+    border-color: #b42318;
+}
+
+#authContent {
+    display: none;
+}
+
+
+@media (max-width: 600px) {
+
+    body::before {
+        left: 20px;
+    }
+
+    .container {
+        width: calc(100% - 30px);
+        padding: 20px 15px 30px 30px;
+        margin: 20px auto;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+}
