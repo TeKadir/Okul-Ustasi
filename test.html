@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff19a">
+<link rel="apple-touch-icon" href="ikonlar/apple-touch-icon.png">
+<title>Testler - Okul Ustası</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="test.css">
+
+<script>
+try {
+    if (localStorage.getItem("ou-tema") === "dark") {
+        document.documentElement.setAttribute("data-tema", "dark");
+    }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="ortak.css">
+<link rel="stylesheet" href="yeni.css">
+</head>
+
+<body>
+
+<header class="ou-ust">
+    <div class="ou-sol">
+        <button type="button" class="ou-panel-ac" id="ouPanelAc"
+                aria-label="Menüyü aç" aria-expanded="false" aria-controls="ouPanel">
+            <span class="ou-ikon" aria-hidden="true"></span>
+            <span class="ou-panel-ac-yazi">Panel</span>
+        </button>
+        <a class="ou-marka" href="anasayfa.html">Okul Ustası</a>
+    </div>
+
+    <div class="ou-sag">
+        <a class="ou-giris" id="topLoginLink" href="giris.html">Giriş Yap</a>
+        <div id="topUser">
+            <span id="topUserEmail"></span>
+            <button type="button" class="ou-cikis" id="logoutButton">Çıkış</button>
+        </div>
+        <button type="button" class="ou-tema" id="ouTemaDugme" aria-label="Karanlık temaya geç"></button>
+    </div>
+</header>
+
+<div class="yn-sayfa">
+
+    <h1>Testler</h1>
+    <p class="yn-soluk ts-giris">Seviyeni ve dersini seç, soruları çöz. Giriş yapman gerekmez.</p>
+
+    <div class="ts-yonet-satir" id="adminLink" style="display:none;">
+        <a class="yn-btn ikincil kucuk" href="test-yonet.html">Soru ekle / yönet</a>
+    </div>
+
+
+    <!-- 1) SEÇİM -->
+    <section class="yn-kutu" id="secimAlani">
+
+        <h2>1. Seviyeni seç</h2>
+        <div class="ts-izgara" id="seviyeIzgara"></div>
+
+        <div id="dersBolumu" style="display:none;">
+            <h2>2. Dersini seç</h2>
+            <div class="ts-izgara" id="dersIzgara"></div>
+        </div>
+
+        <div id="ayarBolumu" style="display:none;">
+
+            <h2>3. Test ayarları</h2>
+
+            <div class="yn-alan">
+                <label for="konuSec">Konu</label>
+                <select id="konuSec"></select>
+            </div>
+
+            <div class="yn-alan">
+                <span class="ts-etiket">Soru kaynağı</span>
+                <div class="ts-satir" id="kaynakDugmeleri"></div>
+            </div>
+
+            <div class="yn-alan">
+                <span class="ts-etiket">Zorluk</span>
+                <div class="ts-satir" id="zorlukDugmeleri"></div>
+            </div>
+
+            <div class="yn-alan">
+                <span class="ts-etiket">Soru sayısı</span>
+                <div class="ts-satir" id="adetDugmeleri"></div>
+                <div class="yn-soluk ts-not" id="uygunNot"></div>
+            </div>
+
+            <button type="button" class="yn-btn" id="baslatBtn">Testi başlat</button>
+        </div>
+
+        <div class="yn-mesaj" id="secimMesaj" role="status"></div>
+    </section>
+
+
+    <!-- 2) TEST -->
+    <section class="yn-kutu" id="testAlani" style="display:none;">
+
+        <div class="ts-ust">
+            <strong id="tsSayac"></strong>
+            <button type="button" class="yn-btn kucuk" id="bitirUstBtn">Testi bitir</button>
+        </div>
+
+        <div class="ts-cubuk" aria-hidden="true"><div class="ts-dolu" id="tsDolu"></div></div>
+
+        <div class="ts-nav" id="tsNav" aria-label="Soru numaraları"></div>
+
+        <div class="ts-soru-ust">
+            <div class="ts-rozetler" id="tsRozet"></div>
+            <button type="button" class="ts-anlamadim" id="anlamadimBtn" aria-pressed="false">Anlamadım</button>
+        </div>
+        <p class="ts-soru" id="tsSoru"></p>
+        <div id="tsSiklar"></div>
+
+        <div class="ts-alt">
+            <button type="button" class="yn-btn ikincil" id="oncekiBtn">Önceki</button>
+            <button type="button" class="yn-btn" id="sonrakiBtn">Sonraki</button>
+        </div>
+
+        <div class="yn-mesaj" id="testMesaj" role="status"></div>
+    </section>
+
+
+    <!-- 3) SONUÇ -->
+    <section class="yn-kutu" id="sonucAlani" style="display:none;">
+
+        <h2>Sonuç</h2>
+
+        <div class="ts-puan">
+            <strong id="puanBuyuk"></strong>
+            <span id="puanAlt"></span>
+            <div class="yn-soluk ts-xp" id="xpBilgi"></div>
+        </div>
+
+        <div class="ts-satir" style="margin-bottom:14px;">
+            <button type="button" class="ts-chip secili" id="filtreHepsi">Tüm sorular</button>
+            <button type="button" class="ts-chip" id="filtreYanlis">Yanlış ve boşlar</button>
+            <button type="button" class="ts-chip" id="filtreAnlamadim">Anlamadıklarım</button>
+        </div>
+
+        <div class="yn-mesaj" id="sonucMesaj" role="status"></div>
+        <div id="sonucListe"></div>
+
+        <div class="ts-satir">
+            <button type="button" class="yn-btn" id="yeniTestBtn">Yeni test (aynı ayarlar)</button>
+            <button type="button" class="yn-btn ikincil" id="baskaTestBtn">Başka test seç</button>
+        </div>
+    </section>
+
+</div>
+
+<script src="test.js"></script>
+<script src="ortak.js"></script>
+</body>
+</html>

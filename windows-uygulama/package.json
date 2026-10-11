@@ -1,0 +1,31 @@
+{
+    "name": "okul-ustasi",
+    "version": "1.0.0",
+    "description": "Okul Ustası Windows uygulaması",
+    "author": "Okul Ustası",
+    "main": "main.js",
+    "scripts": {
+        "baslat": "node kopyala.js && electron .",
+        "exe": "node kopyala.js && electron-builder --win portable && node tasi.js"
+    },
+    "devDependencies": {
+        "electron": "39.8.10",
+        "electron-builder": "26.15.3"
+    },
+    "build": {
+        "appId": "tr.okulustasi.uygulama",
+        "productName": "Okul Ustası",
+        "artifactName": "Okul-Ustasi.${ext}",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "main.js",
+            "site/**/*"
+        ],
+        "win": {
+            "target": "portable",
+            "icon": "build/icon.ico"
+        }
+    }
+}

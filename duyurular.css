@@ -1,0 +1,294 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf5 0px,
+            #fffdf5 31px,
+            #c9d8e6 32px
+        );
+    font-family: "Comic Sans MS", "Segoe Print", cursive;
+    color: #222;
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    left: 45px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e88989;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.container {
+    width: min(900px, calc(100% - 70px));
+    margin: 35px auto;
+    padding: 25px 35px 40px 55px;
+}
+
+h1 {
+    text-align: center;
+    font-size: clamp(25px, 5vw, 42px);
+    margin-bottom: 15px;
+    transform: rotate(-1deg);
+}
+
+h2 {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-bottom: 12px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.card {
+    background: rgba(255, 255, 250, 0.75);
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 4px 4px 0 #555;
+}
+
+/* =========================================================
+   DUYURU KUTUSU
+========================================================= */
+
+.duyuru {
+    background: rgba(255, 255, 250, 0.75);
+    border: 2px solid #333;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 25px auto;
+    box-shadow: 4px 4px 0 #555;
+    width: min(700px, 100%);
+}
+
+.duyuru h2 {
+    margin-top: 0;
+}
+
+.duyuru-tarih {
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.duyuru-aciklama {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+}
+
+/* =========================================================
+   BUTONLAR
+========================================================= */
+
+.main-button {
+    display: inline-block;
+    background: #fff19a;
+    border: 2px solid #222;
+    box-shadow: 3px 3px 0 #555;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 17px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #222;
+    transition: 0.15s;
+}
+
+.main-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #555;
+}
+
+.secondary-button {
+    background: #fff;
+    display: inline-block;
+    border: 2px solid #333;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 4px;
+}
+
+.secondary-button:hover {
+    background: #eee;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* =========================================================
+   ÜST ÇUBUK
+========================================================= */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px 0 20px;
+}
+
+.topbar-left,
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#topUser {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#topUserEmail {
+    font-size: 14px;
+    color: #555;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.input {
+    width: 100%;
+    padding: 11px;
+    border: 2px solid #333;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+textarea.input {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-message {
+    margin-top: 12px;
+    font-size: 15px;
+    min-height: 22px;
+}
+
+.small-note {
+    font-size: 14px;
+    color: #666;
+    margin-top: 15px;
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+#adminPanel {
+    display: none;
+}
+
+#adminControls {
+    display: none;
+}
+
+.admin-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px dashed #777;
+}
+
+.event-form-box {
+    background: #fff;
+    border: 2px dashed #333;
+    padding: 18px;
+    margin: 15px 0 25px 0;
+}
+
+.admin-duyuru {
+    background: #fff;
+    border: 2px solid #333;
+    padding: 15px;
+    margin: 15px 0;
+    box-shadow: 3px 3px 0 #777;
+}
+
+.admin-duyuru strong {
+    font-size: 19px;
+}
+
+.admin-duyuru-aciklama {
+    margin: 10px 0 12px 0;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    margin-top: 35px;
+    font-size: 13px;
+    color: #777;
+}
+
+@media (max-width: 600px) {
+
+    body::before {
+        left: 20px;
+    }
+
+    .container {
+        width: calc(100% - 30px);
+        padding: 20px 15px 30px 30px;
+        margin: 20px auto;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    .topbar {
+        padding: 10px 12px 0 30px;
+    }
+
+    #topUserEmail {
+        max-width: 140px;
+    }
+
+}

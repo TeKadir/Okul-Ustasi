@@ -1,0 +1,418 @@
+const SUPABASE_URL = "https://hinisayolrgyzcoztobi.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_76n3XsryMfvfdYwKeUu6SA_TCxImZiW";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const $ = function (id) { return document.getElementById(id); };
+
+const topLoginLink = $("topLoginLink");
+const topUser = $("topUser");
+const topUserEmail = $("topUserEmail");
+const logoutButton = $("logoutButton");
+
+let kullaniciId = null;
+let aktifSohbet = null;
+let kanal = null;
+let gosterilen = new Set();
+let adOnbellek = {};
+let aramaZamanlayici = null;
+let aramaSirasi = 0;
+let sohbetSirasi = 0;
+let gonderiliyor = false;
+
+
+function durum(metin, hata) {
+    const el = $("durum");
+    el.textContent = metin || "";
+    el.className = "yn-mesaj" + (metin && hata ? " hata" : "");
+}
+
+function zamanMetni(iso) {
+    return new Date(iso).toLocaleString("tr-TR", {
+        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+    });
+}
+
+
+/* ---------- üst çubuk ---------- */
+
+function ustCubuk(session) {
+    if (session && session.user) {
+        topLoginLink.style.display = "none";
+        topUser.style.display = "flex";
+        topUserEmail.textContent = session.user.email || "";
+    } else {
+        topLoginLink.style.display = "inline-block";
+        topUser.style.display = "none";
+        topUserEmail.textContent = "";
+    }
+}
+
+logoutButton.addEventListener("click", async function () {
+    await supabaseClient.auth.signOut();
+});
+
+
+/* ---------- sohbet listesi ---------- */
+
+async function sohbetleriYukle() {
+
+    const { data, error } = await supabaseClient.rpc("sohbetlerim");
+
+    const kap = $("sohbetListesi");
+    kap.textContent = "";
+
+    if (error) {
+        console.error(error);
+        kap.textContent = "Sohbetler yüklenemedi.";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        const bos = document.createElement("div");
+        bos.className = "yn-bos";
+        bos.textContent = "Henüz sohbetin yok. Yukarıdan birini ara.";
+        kap.appendChild(bos);
+        return;
+    }
+
+    data.forEach(function (s) {
+
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "yn-sohbet-oge" + (s.conversation_id === aktifSohbet ? " aktif" : "");
+
+        const ad = document.createElement("strong");
+        ad.textContent = s.diger_kullanici;
+
+        const son = document.createElement("span");
+        son.textContent = s.son_mesaj || "Henüz mesaj yok";
+
+        b.appendChild(ad);
+        b.appendChild(son);
+
+        b.addEventListener("click", function () {
+            sohbetiAc(s.conversation_id, s.diger_kullanici);
+        });
+
+        kap.appendChild(b);
+    });
+}
+
+
+/* ---------- kullanıcı arama ---------- */
+
+async function ara() {
+
+    const q = $("araInput").value.trim();
+    const kap = $("araSonuc");
+    const sira = ++aramaSirasi;
+
+    if (q.length < 2) {
+        kap.textContent = "";
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc("kullanici_ara", { p_q: q });
+
+    if (sira !== aramaSirasi) {
+        return;
+    }
+
+    kap.textContent = "";
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        const bos = document.createElement("div");
+        bos.className = "yn-soluk";
+        bos.textContent = "Kullanıcı bulunamadı.";
+        kap.appendChild(bos);
+        return;
+    }
+
+    data.forEach(function (k) {
+
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "yn-sohbet-oge";
+
+        const ad = document.createElement("strong");
+        ad.textContent = k.username;
+        b.appendChild(ad);
+
+        b.addEventListener("click", async function () {
+
+            b.disabled = true;
+
+            const { data: id, error: hata } = await supabaseClient.rpc("sohbet_baslat", {
+                p_username: k.username
+            });
+
+            b.disabled = false;
+
+            if (hata) {
+                durum(hata.message, true);
+                return;
+            }
+
+            $("araInput").value = "";
+            kap.textContent = "";
+
+            await sohbetleriYukle();
+            sohbetiAc(id, k.username);
+        });
+
+        kap.appendChild(b);
+    });
+}
+
+$("araInput").addEventListener("input", function () {
+    clearTimeout(aramaZamanlayici);
+    aramaZamanlayici = setTimeout(ara, 300);
+});
+
+
+/* ---------- mesajlar ---------- */
+
+async function kullaniciAdi(id) {
+
+    if (adOnbellek[id]) {
+        return adOnbellek[id];
+    }
+
+    const { data } = await supabaseClient
+        .from("profiles")
+        .select("username")
+        .eq("id", id)
+        .maybeSingle();
+
+    adOnbellek[id] = data ? data.username : "kullanıcı";
+    return adOnbellek[id];
+}
+
+function mesajCiz(m) {
+
+    if (gosterilen.has(m.id)) {
+        return;
+    }
+
+    gosterilen.add(m.id);
+
+    const benim = m.sender_id === kullaniciId;
+
+    const kutu = document.createElement("div");
+    kutu.className = "yn-msg" + (benim ? " benim" : "");
+    kutu.dataset.id = String(m.id);
+
+    const ust = document.createElement("div");
+    ust.className = "yn-msg-ust";
+    ust.textContent = m.username + "  " + zamanMetni(m.created_at);
+
+    const metin = document.createElement("div");
+    metin.className = "yn-msg-metin";
+    metin.textContent = m.content;
+
+    kutu.appendChild(ust);
+    kutu.appendChild(metin);
+
+    if (benim) {
+        const sil = document.createElement("button");
+        sil.type = "button";
+        sil.className = "yn-btn tehlike kucuk";
+        sil.style.marginLeft = "6px";
+        sil.textContent = "Sil";
+        sil.addEventListener("click", function () { mesajSil(m.id, sil); });
+        ust.appendChild(sil);
+    }
+
+    const kap = $("mesajlar");
+    const altta = kap.scrollHeight - kap.scrollTop - kap.clientHeight < 80;
+
+    kap.appendChild(kutu);
+
+    if (altta || benim) {
+        kap.scrollTop = kap.scrollHeight;
+    }
+}
+
+function kanaldanAyril() {
+    if (kanal) {
+        supabaseClient.removeChannel(kanal);
+        kanal = null;
+    }
+}
+
+async function sohbetiAc(id, ad) {
+
+    const sira = ++sohbetSirasi;
+
+    kanaldanAyril();
+
+    aktifSohbet = id;
+    gosterilen = new Set();
+
+    $("sohbetBaslik").textContent = ad;
+    $("mesajlar").textContent = "Yükleniyor...";
+    $("yazAlani").style.display = "flex";
+    $("duzen").classList.add("mesaj-acik");
+    durum("");
+
+    const { data, error } = await supabaseClient.rpc("mesajlari_getir", { p_conv: id });
+
+    if (sira !== sohbetSirasi) {
+        return;
+    }
+
+    $("mesajlar").textContent = "";
+
+    if (error) {
+        console.error(error);
+        durum("Mesajlar yüklenemedi: " + error.message, true);
+        return;
+    }
+
+    (data || []).forEach(function (m) {
+        adOnbellek[m.sender_id] = m.username;
+        mesajCiz(m);
+    });
+
+    $("mesajlar").scrollTop = $("mesajlar").scrollHeight;
+
+    /* Gerçek zamanlı: yeni mesaj ve silinen mesaj. RLS Realtime'da da geçerlidir. */
+    kanal = supabaseClient
+        .channel("sohbet-" + id)
+        .on("postgres_changes",
+            { event: "INSERT", schema: "public", table: "messages", filter: "conversation_id=eq." + id },
+            async function (yuk) {
+                const m = yuk.new;
+                m.username = await kullaniciAdi(m.sender_id);
+                if (aktifSohbet === id) {
+                    mesajCiz(m);
+                    sohbetleriYukle();
+                }
+            })
+        .on("postgres_changes",
+            { event: "DELETE", schema: "public", table: "messages" },
+            function (yuk) {
+                const eski = yuk.old && yuk.old.id;
+                if (eski === undefined) { return; }
+                const el = $("mesajlar").querySelector('[data-id="' + eski + '"]');
+                if (el) { el.remove(); }
+                gosterilen.delete(eski);
+            })
+        .subscribe();
+
+    sohbetleriYukle();
+}
+
+async function mesajGonder() {
+
+    if (gonderiliyor || !aktifSohbet) {
+        return;
+    }
+
+    const metin = $("mesajInput").value.trim();
+
+    if (!metin) {
+        return;
+    }
+
+    gonderiliyor = true;
+    $("gonderBtn").disabled = true;
+    durum("");
+
+    /* sender_id gönderilmiyor: sütun varsayılanı auth.uid(); RLS de doğruluyor. */
+    const { data, error } = await supabaseClient
+        .from("messages")
+        .insert({ conversation_id: aktifSohbet, content: metin })
+        .select("id, sender_id, content, created_at")
+        .single();
+
+    gonderiliyor = false;
+    $("gonderBtn").disabled = false;
+
+    if (error) {
+        console.error(error);
+        durum("Mesaj gönderilemedi: " + error.message, true);
+        return;
+    }
+
+    $("mesajInput").value = "";
+
+    data.username = await kullaniciAdi(data.sender_id);
+    mesajCiz(data);
+    sohbetleriYukle();
+}
+
+async function mesajSil(id, dugme) {
+
+    if (!window.confirm("Bu mesaj silinsin mi?")) {
+        return;
+    }
+
+    dugme.disabled = true;
+
+    const { error } = await supabaseClient.from("messages").delete().eq("id", id);
+
+    if (error) {
+        console.error(error);
+        durum("Mesaj silinemedi: " + error.message, true);
+        dugme.disabled = false;
+        return;
+    }
+
+    const el = $("mesajlar").querySelector('[data-id="' + id + '"]');
+    if (el) { el.remove(); }
+    gosterilen.delete(id);
+    sohbetleriYukle();
+}
+
+$("gonderBtn").addEventListener("click", mesajGonder);
+
+$("mesajInput").addEventListener("keydown", function (olay) {
+    if (olay.key === "Enter" && !olay.shiftKey) {
+        olay.preventDefault();
+        mesajGonder();
+    }
+});
+
+$("geriBtn").addEventListener("click", function () {
+    $("duzen").classList.remove("mesaj-acik");
+});
+
+
+/* ---------- oturum ---------- */
+
+function oturumDurumu(session) {
+
+    ustCubuk(session);
+
+    const yeni = session && session.user ? session.user.id : null;
+    const eski = kullaniciId;
+
+    kullaniciId = yeni;
+
+    $("girisYok").style.display = yeni ? "none" : "block";
+    $("sohbetAlani").style.display = yeni ? "block" : "none";
+
+    if (yeni && yeni !== eski) {
+        sohbetleriYukle();
+    }
+
+    if (!yeni) {
+        kanaldanAyril();
+        aktifSohbet = null;
+    }
+}
+
+supabaseClient.auth.onAuthStateChange(function (olay, session) {
+    oturumDurumu(session);
+});
+
+supabaseClient.auth.getSession().then(function (r) {
+    oturumDurumu(r.data.session);
+});
